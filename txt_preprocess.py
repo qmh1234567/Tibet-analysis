@@ -44,7 +44,7 @@ def WordCount(str_words):
 def GenWordCloud(str_words):
     image=plt.imread('img.jpg')
     wc=WordCloud(background_color='white',
-                font_path="fangsong_GB2312.ttf", # 设置字体格式，不设置显示不了中文
+                font_path="Resource/fangsong_GB2312.ttf", # 设置字体格式，不设置显示不了中文
                 max_words=2000,
                 mask=image, # 词云形状
                 )
@@ -59,10 +59,13 @@ def GenWordCloud(str_words):
 # HanLp 分词  默认为去停用词  返回分好词的字符串
 def HanLp_Segment(raw,flag_stop=True):
     # 停用词列表
-    stop_word_path='stopwords.txt'
+    stop_word_path='Resources/stopwords.txt'
     stopwordlist=stopwordslist(stop_word_path)
     # 默认分词
-    wordList=HanLP.segment(raw)
+    # wordList=HanLP.segment(raw)
+    #Hanlp分词
+    NLPTokenizer=JClass('com.hankcs.hanlp.tokenizer.NLPTokenizer')
+    wordList= NLPTokenizer.segment(raw)
     # 保存清洗后的数据
     wordList1=str(wordList).split(',')
     # 去除词性的标签

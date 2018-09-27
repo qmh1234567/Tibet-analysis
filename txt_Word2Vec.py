@@ -1,4 +1,5 @@
 from jpype import *
+import pandas as pd
 from pyhanlp import *
 import sys
 from txt_preprocess import  *
@@ -30,9 +31,10 @@ def SegmentContList(Contlist,CutWordtxt):
     StrWords=""
     # 遍历每一条新闻
     for item in Contlist:
-        # 调用封装的函数
+        # 调用封装的函数对每条新闻进行分词
         content=HanLp_Segment(item)
-        StrWords+=str(content)
+        # 添加换行符
+        StrWords+=str(content)+"\n"
     t2=time.time()
     print("\n分词花费时间为:%s s" % (t2-t1))
     # 将分词后的结果写入文件
@@ -52,8 +54,6 @@ def Tibet_Word2Vec(CutWordpath,Binarypath):
 
 # 词向量的测试
 def Test_Word2vec(model):
-    # 加载词向量的二进制文件
-    model=word2vec.Word2Vec.load(Binarypath)
     print("与国歌最相近的词语是\n")
     result=model.wv.most_similar(positive='国歌',topn=15)
     for word in result:
@@ -140,7 +140,8 @@ if __name__ == '__main__':
     # 加载词向量的二进制文件
     model=word2vec.Word2Vec.load(Binarypath)
     # 词向量可视化
-    KeyWordView(model,120)
+    KeyWordView(model,100)
+    Test_Word2vec(model)
 
 
 

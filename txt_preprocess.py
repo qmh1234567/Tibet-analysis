@@ -27,19 +27,6 @@ def stopwordslist(path):
     stplst=stpwds.splitlines()
     return stplst
 
-
-'''
-改用word2vec  
-'''
-# 将文本中的词语转化为词频矩阵 待修改
-def WordCount(str_words):
-    word_list=str_words.split(u"。")
-    
-    word_dict=dict(collections.Counter(word_list))
-    return word_dict
-
-    
-
 # 生成词云
 def GenWordCloud(str_words):
     image=plt.imread('img.jpg')
@@ -57,6 +44,7 @@ def GenWordCloud(str_words):
     # wc.to_file("1.jpg")
     
 # HanLp 分词  默认为去停用词  返回分好词的字符串
+# raw代表一条新闻的内容  默认去停用词
 def HanLp_Segment(raw,flag_stop=True):
     # 停用词列表
     stop_word_path='Resources/stopwords.txt'
@@ -75,18 +63,15 @@ def HanLp_Segment(raw,flag_stop=True):
             slope=v.index('/')
             letter=v[1:slope]   # 截取/前面的字符串
             # 添加换行符
-            if '\n' in letter:
-                str_words+="\n"
-            else:
-                letter=letter.strip()  # 去除空格
-                if flag_stop == True: 
-                    '''去停用词'''
-                    if letter not in stopwordlist: 
-                        str_words+=letter+" "   
-                    else:
-                        continue
+            letter=letter.strip()  # 去除空格
+            '''去停用词'''
+            if flag_stop == True: 
+                if letter not in stopwordlist: 
+                    str_words+=letter+" "   
                 else:
-                    str_words+=letter+" " 
+                    continue
+            else:
+                str_words+=letter+" " 
     return str_words 
 
 

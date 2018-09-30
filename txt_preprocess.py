@@ -56,12 +56,15 @@ def HanLp_Segment(raw,flag_stop=True):
     wordList= NLPTokenizer.segment(raw)
     # 保存清洗后的数据
     wordList1=str(wordList).split(',')
+    # print(wordList1)
     # 去除词性的标签
     str_words=""
     for v in wordList1[0:len(wordList1)-1]:
         if "/" in v:
             slope=v.index('/')
             letter=v[1:slope]   # 截取/前面的字符串
+            if v[slope:]=='/m' or v[slope:]=='/q' or v[slope:]=='/f' or v[slope:]=='/u' or v[slope:]=='/t':
+                continue
             # 添加换行符
             letter=letter.strip()  # 去除空格
             '''去停用词'''

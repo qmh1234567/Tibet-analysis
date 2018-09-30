@@ -46,11 +46,24 @@ def Tibet_Word2Vec(CutWordpath,Binarypath):
     t1=time.time()
     # 构建词向量  size是特征向量的维度  workers是cup数量  min_count是词频少于min_count次数的单词会被丢弃掉  window：当前词与预测词在一个句子中的最大距离是多少
     # PathLineSentences 读取目录下的所有文件 sample表示更高频率的词被随机下采样到所设置的阈值  hs=1表示softmax会被使用
-    model=word2vec.Word2Vec(word2vec.PathLineSentences(CutWordpath),size=300,workers=4,min_count=10,window=5,negative=3,sample=0.001,hs=1)
+    # sg为训练算法  默认为0对应CBOW算法   1对于skip-gram算法
+    model=word2vec.Word2Vec(word2vec.PathLineSentences(CutWordpath),size=200,workers=4,min_count=10,window=5,negative=3,sample=0.0001,hs=1)
     # 保存至二进制文件
     model.save(Binarypath)
     t2=time.time()
+    # 获取model里面的所有关键词
+    keys=model.wv.vocab.keys()
+    # 获取词对应的词向量
+    f=open("keyword.txt",'w',encoding='utf-8')
+    wordvector=[]
+    for key in keys:
+        f.write(key+" ")
+        wordvector.append(model[key])
+    # print("\n关键词\n",keys,len(keys))
+
+
     print("\n训练词向量花费时间为:%s s" %(t2-t1))
+
 
 # 词向量的测试
 def Test_Word2vec(model):
@@ -63,7 +76,7 @@ def Test_Word2vec(model):
 
 
 # 提取前200个关键词
-def ExtractKeyword(wordCount=200):
+def ExtractKeywords(KeyWordPath,CutWordtxt,wordCount=200):
     t1=time.time()
     # 提取前200个关键词
     document=open(CutWordtxt,'r',encoding='utf-8').read()
@@ -92,12 +105,12 @@ def Plot_tnse_2D(word_vectors,words_list):
 
 
 # 对关键词进行可视化
-def KeyWordView(model,wordCount):
+def KeyWordView(KeyWordPath,CutWordtxt,model,wordCount):
+    print("正在执行word2vec的关键词可视化...")
     # 提取关键词
-    KeywordList=ExtractKeyword(wordCount)
+    KeywordList=ExtractKeywords(KeyWordPath,CutWordtxt,wordCount)
     Keywordstr=open(KeyWordPath,'r',encoding='utf-8').read()
     KeywordList=Keywordstr.split(" ")
-    print(KeywordList)
     words_list=[]
     word_vectors=[]
     for word in KeywordList:
@@ -117,31 +130,31 @@ def KeyWordView(model,wordCount):
     Plot_tnse_2D(word_vectors,words_list)
 
 
-if __name__ == '__main__':
-    # 打印信息
-    logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s')
-    logging.root.setLevel(level=logging.INFO)
+# if __name__ == '__main__':
+    # # 打印信息
+    # logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s')
+    # logging.root.setLevel(level=logging.INFO)
     # 文件的路径
-    jsonfile='Resources/tibet.json'
-    CutWordtxt='Resources/CutWordPath/tibet.txt'
-    Binarypath='Resources/TibetWord2vec'
-    CutWordPath='Resources/CutWordPath/'
-    KeyWordPath='Resources/keyword.txt'
-    # 判断文件是否更新有待完成
-    if not os.path.exists(Binarypath):
-        if not os.path.exists(CutWordtxt):
-            # 读取json文件
-            Contlist=ConjsontoList(jsonfile)
-            print("正在分词中..")
-            # 分词，并将结果写入文件
-            SegmentContList(Contlist,CutWordtxt)
-            # 训练词向量
-            Tibet_Word2Vec(CutWordPath,Binarypath)
-    # 加载词向量的二进制文件
-    model=word2vec.Word2Vec.load(Binarypath)
-    # 词向量可视化
-    KeyWordView(model,100)
-    Test_Word2vec(model)
+    # jsonfile='Resources/tibet.json'
+    # CutWordtxt='Resources/CutWordPath/tibet.txt'
+    # Binarypath='Resources/TibetWord2vec'
+    # CutWordPath='Resources/CutWordPath/'
+    # KeyWordPath='Resources/keyword.txt'
+    # # 判断文件是否更新有待完成
+    # if not os.path.exists(Binarypath):
+    #     if not os.path.exists(CutWordtxt):
+    #         # 读取json文件
+    #         Contlist=ConjsontoList(jsonfile)
+    #         print("正在分词中..")
+    #         # 分词，并将结果写入文件
+    #         SegmentContList(Contlist,CutWordtxt)
+    #         # 训练词向量
+    #         Tibet_Word2Vec(CutWordPath,Binarypath)
+    # # 加载词向量的二进制文件
+    # model=word2vec.Word2Vec.load(Binarypath)
+    # # 词向量可视化
+    # KeyWordView(model,50)
+    # Test_Word2vec(model)
 
 
 

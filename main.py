@@ -1,29 +1,30 @@
-from text_LDA import *
-from txt_Word2Vec import *
-
+from text_LDA import CutWordList,LDA_featureExtract,print_top_words,TF_IDF
+from txt_Word2Vec import Process_News,Read_file,Tibet_Word2Vec
+from gensim.models import word2vec
+import pyLDAvis
 # 文件的路径
-jsonfile='Resources/tibet.json'  # json文件路径
-CutWordtxt='Resources/CutWordPath/tibet.txt' 
-Binarypath='Resources/TibetWord2vec'
-CutWordPath='Resources/CutWordPath/'
-KeyWordPath='Resources/keyword.txt'
+jsonfile='./Resources/jsonfiles/xzw_total_train.json'  # json文件路径
+CutWordtxt='Resources/CutWordPath/xzw_total.txt' 
+Binarypath='Resources/Binaryfiles/xzw_total_WC'
+
+TibetUnTxt = 'Resources/CutWordPath/tibetUn.txt'
+CorrectTxt = 'Resources/CutWordPath/tibetUn_1.txt'
+Nametxt='Resources/CutWordPath/人名.txt'
+Placetxt='Resources/CutWordPath/地名.txt'
+
+# KeyWordPath='Resources/keyword.txt'
 
 def Do_txt_Word2Vec():
-     # 判断文件是否更新有待完成
-    # if not os.path.exists(Binarypath):
-    # if not os.path.exists(CutWordtxt):
-    # 读取json文件
-    Contlist=ConjsontoList(jsonfile)
-    print("正在分词中..")
-    # 分词，并将结果写入文件
-    SegmentContList(Contlist,CutWordtxt)
+    # 读取分词后的文件
+    contents=Read_file(jsonfile,CutWordtxt)
     # 训练词向量
-    Tibet_Word2Vec(CutWordPath,Binarypath)
+    Tibet_Word2Vec(CutWordtxt,Binarypath)
     # 加载词向量的二进制文件
     model=word2vec.Word2Vec.load(Binarypath)
-    # # 词向量可视化
-    # KeyWordView(KeyWordPath,CutWordtxt,model,100)
-    # Test_Word2vec(model)
+    # 去除tibetUn.txt里的编辑人、新闻来源、&gt、英文人名、A115、时间日期等
+    # DataClean(TibetUnTxt, CorrectTxt)
+    print(model.most_similar('中国'))
+    
 
 
 def Do_txt_LDA(CutWordtxt):
@@ -41,6 +42,7 @@ def Do_txt_LDA(CutWordtxt):
     # 输出lda训练结果
     print_top_words(lda, tf_feature_names, n_top_words)
     data = pyLDAvis.sklearn.prepare(lda, tf, tf_vectorizer)
+    print(data)
     pyLDAvis.show(data)
     # 显示动态图
     pyLDAvis.enable_notebook()

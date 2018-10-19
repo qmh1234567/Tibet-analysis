@@ -12,67 +12,61 @@ import logging
 import numpy as np
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans 
+import re
 
 plt.rcParams['font.sans-serif']=['SimHei'] # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus']=False # 用来正常显示负号
 
-# 将json文件转化成列表  列表中的一个表项代表一条新闻的内容
-def ConjsontoList(jsonfile):
-    ContentList=[]
-    with open(jsonfile,"r",encoding='utf-8') as f:
-        dicts=json.load(f)
-        for item in dicts:
-            ContentList.append(item['content'])
-    return ContentList
 
-# 对列表的内容进行分词处理  ContList的每个item相当于一个新闻
-def SegmentContList(Contlist,CutWordtxt):
-    t1=time.time()
-    StrWords=""
-    # 遍历每一条新闻
-    for item in Contlist:
-        # 调用封装的函数对每条新闻进行分词
-        content=HanLp_Segment(item)
-        # 添加换行符
-        StrWords+=str(content)+"\n"
-    t2=time.time()
-    print("\n分词花费时间为:%s s" % (t2-t1))
-    # 将分词后的结果写入文件
-    with open(CutWordtxt,'w',encoding='utf-8') as fw:
-        fw.write(StrWords)
+# 对每条新闻内容进行分词和语料清洗
+def Process_News(single_new):
+    # 调用封装的函数对每条新闻进行分词
+    segment_new=HanLp_Segment(single_new)
+    # 对分词后的内容进行清洗
+    # clean_new=DataClean(segment_new)
+    return segment_new
+
+
+def Read_file(jsonfile,CutWordtxt):
+    contents=[]
+    # 读取json文件
+    with open(jsonfile,'r',encoding='utf-8') as f:
+        dicts=json.load(f)
+        print("分词中...")
+        for item in dicts:
+            # 调用分词函数处理每篇文章
+            content = Process_News(item['content'])
+            contents.append(content)
+    with open(CutWordtxt,'w',encoding='utf-8') as f:
+        for line in contents:
+            f.write(line+'\n')
+    return contents
+
+
+# 语料清洗
+def DataClean(StrWords):
+    pass
     
+
 # 使用Word2vec得到每个单词的词向量
-def Tibet_Word2Vec(CutWordpath,Binarypath):
+def Tibet_Word2Vec(CutWordtxt,Binarypath):
     t1=time.time()
+    # 导入训练集
+    sentences=word2vec.Text8Corpus(CutWordtxt)
     # 构建词向量  size是特征向量的维度  workers是cup数量  min_count是词频少于min_count次数的单词会被丢弃掉  window：当前词与预测词在一个句子中的最大距离是多少
     # PathLineSentences 读取目录下的所有文件 sample表示更高频率的词被随机下采样到所设置的阈值  hs=1表示softmax会被使用
     # sg为训练算法  默认为0对应CBOW算法   1对于skip-gram算法
-    model=word2vec.Word2Vec(word2vec.PathLineSentences(CutWordpath),size=200,workers=4,min_count=10,window=5,negative=3,sample=0.0001,hs=1)
+    model=word2vec.Word2Vec(sentences,size=200,workers=4,min_count=10,window=5,negative=3,sample=0.0001,hs=1)
     # 保存至二进制文件
     model.save(Binarypath)
     t2=time.time()
-    # 获取model里面的所有关键词
-    keys=model.wv.vocab.keys()
-    # 获取词对应的词向量
-    f=open("keyword.txt",'w',encoding='utf-8')
-    wordvector=[]
-    for key in keys:
-        f.write(key+" ")
-        wordvector.append(model[key])
-    # print("\n关键词\n",keys,len(keys))
-
-
     print("\n训练词向量花费时间为:%s s" %(t2-t1))
 
 
-# 词向量的测试
-def Test_Word2vec(model):
-    print("与国歌最相近的词语是\n")
-    result=model.wv.most_similar(positive='国歌',topn=15)
-    for word in result:
-        print(word[0],word[1])
-    print("书记和领导的相似度为:\n")
-    print(model.similarity(u'书记',u'领导'))
+
+
+
 
 
 # 提取前200个关键词
@@ -90,7 +84,6 @@ def ExtractKeywords(KeyWordPath,CutWordtxt,wordCount=200):
     print("提取关键词所花时间为",(t2-t1))
     return KeywordList
 
-
 # 词向量的可视化
 def Plot_tnse_2D(word_vectors,words_list):
     tsne=TSNE(n_components=2,random_state=0,n_iter=10000,perplexity=3)
@@ -102,7 +95,6 @@ def Plot_tnse_2D(word_vectors,words_list):
     for label,x,y in zip(labels,T[:,0],T[:,1]):
         plt.annotate(label,xy=(x+1,y+1),xytext=(0,0),textcoords='offset points')
     plt.show()
-
 
 # 对关键词进行可视化
 def KeyWordView(KeyWordPath,CutWordtxt,model,wordCount):
@@ -130,31 +122,6 @@ def KeyWordView(KeyWordPath,CutWordtxt,model,wordCount):
     Plot_tnse_2D(word_vectors,words_list)
 
 
-# if __name__ == '__main__':
-    # # 打印信息
-    # logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s')
-    # logging.root.setLevel(level=logging.INFO)
-    # 文件的路径
-    # jsonfile='Resources/tibet.json'
-    # CutWordtxt='Resources/CutWordPath/tibet.txt'
-    # Binarypath='Resources/TibetWord2vec'
-    # CutWordPath='Resources/CutWordPath/'
-    # KeyWordPath='Resources/keyword.txt'
-    # # 判断文件是否更新有待完成
-    # if not os.path.exists(Binarypath):
-    #     if not os.path.exists(CutWordtxt):
-    #         # 读取json文件
-    #         Contlist=ConjsontoList(jsonfile)
-    #         print("正在分词中..")
-    #         # 分词，并将结果写入文件
-    #         SegmentContList(Contlist,CutWordtxt)
-    #         # 训练词向量
-    #         Tibet_Word2Vec(CutWordPath,Binarypath)
-    # # 加载词向量的二进制文件
-    # model=word2vec.Word2Vec.load(Binarypath)
-    # # 词向量可视化
-    # KeyWordView(model,50)
-    # Test_Word2vec(model)
 
 
 

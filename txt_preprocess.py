@@ -49,33 +49,37 @@ def HanLp_Segment(raw,flag_stop=True):
     # 停用词列表
     stop_word_path='Resources/stopwords.txt'
     stopwordlist=stopwordslist(stop_word_path)
-    # 默认分词
-    # wordList=HanLP.segment(raw)
     #Hanlp分词
     NLPTokenizer=JClass('com.hankcs.hanlp.tokenizer.NLPTokenizer')
     wordList= NLPTokenizer.segment(raw)
     # 保存清洗后的数据
     wordList1=str(wordList).split(',')
-    # print(wordList1)
     # 去除词性的标签
     str_words=""
-    for v in wordList1[0:len(wordList1)-1]:
+    for v in wordList1[0:len(wordList1)]:
         if "/" in v:
             slope=v.index('/')
-            letter=v[1:slope]   # 截取/前面的字符串
+            # 先根据词性过滤掉一些词
             if v[slope:]=='/m' or v[slope:]=='/q' or v[slope:]=='/f' or v[slope:]=='/u' or v[slope:]=='/t':
                 continue
             # 添加换行符
-            letter=letter.strip()  # 去除空格
-            '''去停用词'''
-            if flag_stop == True: 
-                if letter not in stopwordlist: 
-                    str_words+=letter+" "   
-                else:
-                    continue
+            letter=v[1:slope]   # 截取/前面的字符串
+            nature=v[slope+1:]  # 取出词性
+            if '\n' in letter:
+                str_words+="\n"
             else:
-                str_words+=letter+" " 
-    return str_words 
+                letter=letter.strip()  # 去除空格
+                if flag_stop == True:
+                    '''去停用词'''
+                    if letter not in stopwordlist: 
+                        str_words+=letter+" "
+                        # letter.replace('\n','')
+                        # letter.replace('\r','')
+                    else:
+                        continue
+                else:
+                    str_words+=letter+" "
+    return str_words
 
 
 '''
@@ -123,30 +127,3 @@ def Hanlp_Seg(read_folder_path,write_folder_path,stopwordlist):
                     # f1.write("%s,%d\n" % (k,v))   
             j+=1
 
-
-
-
-# if __name__ == '__main__':
-    # print("开始进行文本分词操作\n")
-    # stop_word_path='stopwords.txt'
-    # # 停用词列表
-    # stopwordlist=stopwordslist(stop_word_path)
-    # # 待分词的语料根目录
-    # read_folder_path='news/'
-    # write_folder_path='CutNews/'
-    # t1=time.time()
-    # # HanLP分词
-    # Hanlp_Seg(read_folder_path,write_folder_path,stopwordlist)
-    # t2=time.time()
-    # print("完成中文文本分词"+str(t2-t1)+"秒")
-    
-  
-        # print(dicts)
-    # print(dicts{1}['content'])
-  
-   
-
-  
-
-
-        

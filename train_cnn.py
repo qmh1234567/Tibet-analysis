@@ -10,8 +10,8 @@ from tensorflow.contrib import learn
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("jsonfile", "./Resources/jsonfiles/xzw_total_train.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./Resources/CutWordPath/xzw.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("jsonfile", "./Resources/jsonfiles/xzw_total.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./Resources/CutWordPath/xzw_part.txt", "Data source for the cutword save file.")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
@@ -41,7 +41,7 @@ FLAGS = tf.flags.FLAGS
 def preprocess():
     # Load data
     print("Loading data...")
-    x_text,y=data_helpers.Read_file(FLAGS.cutwordfile,FLAGS.jsonfile)
+    x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile)
    
     # Build vocabulary
     max_document_length = max([len(x.split(" ")) for x in x_text])

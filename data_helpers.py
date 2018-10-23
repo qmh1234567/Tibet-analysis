@@ -6,9 +6,26 @@ import itertools
 
 # 标签说明 ：宗教 0  文化1  生态2 
 # 统计新闻
-def Read_file(cutwordfile=None,jsonfile=None):
-    # cutwordfile='./Resources/CutWordPath/xzw.txt'
-    # jsonfile='./Resources/jsonfiles/xzw_total_train.json'
+def Statistic_News():
+    jsonfile='./Resources/jsonfiles/xzw_total.json'
+    with open(jsonfile,"r",encoding='utf-8') as f:
+        count=0
+        dicts=json.load(f)
+        contents={
+        "宗教":0,
+        "生态":0,
+        "文化":0
+        }
+        for dict_item in dicts:
+            if dict_item['type'] in contents.keys():
+                contents[dict_item['type']]+=1
+                count+=1
+            else:
+                continue
+    print(contents)
+
+# 加载数据集
+def load_data_and_labels(cutwordfile=None,jsonfile=None):
     x_text=[]
     with open(jsonfile,"r",encoding='utf-8') as f:
         dicts=json.load(f)
@@ -38,6 +55,7 @@ def Read_file(cutwordfile=None,jsonfile=None):
     # 转化为np.array类型
     y=np.array(y)
     return [x_text,y]
+
 
 # 填充句子  
 def pad_sentences(sentences,padding_word="<PAD/>"):
@@ -100,11 +118,7 @@ def batch_iter(data,batch_size,num_epochs):
             end_index=min((batch_num+1)*batch_size,data_size)
             yield shuffled_data[start_index:end_index]
 
-
-if __name__ == '__main__':
-#    [x,y,vocabulary,vocabulary_inv]=load_data()
-   print(x)
-   print("*"*70)
-   print(y)
-   
+# if __name__ == '__main__':
+#     Statistic_News()
+       
     

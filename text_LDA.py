@@ -9,14 +9,19 @@ from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 import time
 
-# 分词
+'''
+读取分词文件，返回列表
+'''
 def CutWordList(CutWordtxt):
     # CutWordtxt='Resources/CutWordPath/tibet.txt'
     contents=open(CutWordtxt,'r',encoding='utf-8').read()
     content_List=contents.splitlines()  # 分词之后的新闻内容列表
     return content_List
 
-# 特征提取，
+
+'''
+特征提取
+'''
 def TF_IDF(n_features,content_List):
     t1=time.time()
     # n_features = 1000  # 1000个最重要的特征关键词
@@ -32,6 +37,9 @@ def TF_IDF(n_features,content_List):
     print("生成词向量所需时间为",(t2-t1))
     return tf,tf_vectorizer
 
+'''
+查找主题
+'''
 def LDA_featureExtract(n_topics,tf):
     print("正在查找主题...")
     t1=time.time()
@@ -45,7 +53,7 @@ def LDA_featureExtract(n_topics,tf):
     print("查找主题所花时间为",(t2-t1))
     return lda
 
-# 打印结果
+'''打印结果'''
 def print_top_words(model, feature_names, n_top_words):
     for topic_idx, topic in enumerate(model.components_):
         print("Topic #%d:" % topic_idx)
@@ -53,7 +61,7 @@ def print_top_words(model, feature_names, n_top_words):
                         for i in topic.argsort()[:-n_top_words - 1:-1]]))
     print()
 
-# 构建训练语料
+'''构建训练语料'''
 def CreateTrainset(content_List):
     # 生成词典
     cont_list = []
@@ -65,40 +73,13 @@ def CreateTrainset(content_List):
     corpus=[ dictionary.doc2bow(text) for text in cont_list]
     return dictionary,corpus
 
-# LDA模型训练
+'''LDA模型训练 '''
 def TrainLDA(dictionary,corpus,n_topics):
     lda=LdaModel(corpus=corpus,id2word=dictionary,num_topics=n_topics)
     print("打印主题\n")
     print(lda.print_topics(n_topics))
     return lda
 
-# if __name__ == '__main__': 
-#     n_features=1000
-#     n_topics=10  # 主题数目
-#     CutWordtxt='Resources/CutWordPath/tibet.txt'
-#     contlist=CutWordList(CutWordtxt)
-
-#     # dictionary,corpus=CreateTrainset(contlist)
-
-#     # TrainLDA(dictionary,corpus,n_topics)
-
-#     tf,tf_vectorizer=TF_IDF(n_features,contlist)
-#     # 输出前20个关键词
-#     n_top_words = 20
-#     tf_feature_names = tf_vectorizer.get_feature_names()
-
-   
-#     lda=LDA_featureExtract(n_topics,tf)
-#     print_top_words(lda, tf_feature_names, n_top_words)
-
-   
-#     data = pyLDAvis.sklearn.prepare(lda, tf, tf_vectorizer)
-#     pyLDAvis.show(data)
-
-#     # 显示动态图
-#     pyLDAvis.enable_notebook()
-#     # pyLDAvis.enable_notebook()
-#     pyLDAvis.sklearn.prepare(lda,tf, tf_vectorizer)
 
 
 

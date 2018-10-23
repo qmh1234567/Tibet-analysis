@@ -14,12 +14,13 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans 
 import re
+from collections import Counter
 
 plt.rcParams['font.sans-serif']=['SimHei'] # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus']=False # 用来正常显示负号
 
 
-# 对每条新闻内容进行分词和语料清洗
+'''对每条新闻内容进行分词和语料清洗'''
 def Process_News(single_new):
     # 调用封装的函数对每条新闻进行分词
     segment_new=HanLp_Segment(single_new)
@@ -27,7 +28,10 @@ def Process_News(single_new):
     # clean_new=DataClean(segment_new)
     return segment_new
 
-
+'''读取文件  
+jsonfile：json文件路径 CutWordtxt：分词后的文件路径 
+contents:列表 每一项是分好词的新闻
+'''
 def Read_file(jsonfile,CutWordtxt):
     contents=[]
     # 读取json文件
@@ -44,13 +48,18 @@ def Read_file(jsonfile,CutWordtxt):
     return contents
 
 
-# 语料清洗
+'''
+语料清洗
+'''
 def DataClean(StrWords):
     pass
     
 
-# 使用Word2vec得到每个单词的词向量
-def Tibet_Word2Vec(CutWordtxt,Binarypath):
+'''使用Word2vec得到每个单词的词向量
+CutWordtxt: 分词后的文件路径
+Binaryfile：保存word2vec处理后的词向量的二进制文件
+'''
+def Tibet_Word2Vec(CutWordtxt,Binaryfile):
     t1=time.time()
     # 导入训练集
     sentences=word2vec.Text8Corpus(CutWordtxt)
@@ -59,32 +68,29 @@ def Tibet_Word2Vec(CutWordtxt,Binarypath):
     # sg为训练算法  默认为0对应CBOW算法   1对于skip-gram算法
     model=word2vec.Word2Vec(sentences,size=200,workers=4,min_count=10,window=5,negative=3,sample=0.0001,hs=1)
     # 保存至二进制文件
-    model.save(Binarypath)
+    model.save(Binaryfile)
     t2=time.time()
     print("\n训练词向量花费时间为:%s s" %(t2-t1))
+    return True
+
+
+# def predict_proba(model,oword,iword):
+#     iword_vec = model[iword]
+#     oword = model.wv.vocab[oword]
+#     oword_l = model.syn1[oword.point].T
+#     dot = np.dot(iword_vec, oword_l)
+#     lprob = -sum(np.logaddexp(0, -dot) + oword.code*dot) 
+#     return lprob
+
+# # 提取关键词
+# def Extract_keywords(s,model):
+#     s = [w for w in s if w in model]
+#     ws = {w:sum([predict_proba(model,u, w) for u in s]) for w in s}
+#     return Counter(ws).most_common()
 
 
 
-
-
-
-
-# 提取前200个关键词
-def ExtractKeywords(KeyWordPath,CutWordtxt,wordCount=200):
-    t1=time.time()
-    # 提取前200个关键词
-    document=open(CutWordtxt,'r',encoding='utf-8').read()
-    # print(document)
-    KeywordList=list(HanLP.extractKeyword(document,wordCount))
-    KeywordStr=" ".join(KeywordList)
-    print(KeywordList)
-    with open(KeyWordPath,'w',encoding='utf-8') as fw:
-        fw.write(KeywordStr)
-    t2=time.time()
-    print("提取关键词所花时间为",(t2-t1))
-    return KeywordList
-
-# 词向量的可视化
+'''在二维图中显示词向量'''
 def Plot_tnse_2D(word_vectors,words_list):
     tsne=TSNE(n_components=2,random_state=0,n_iter=10000,perplexity=3)
     np.set_printoptions(suppress=True)
@@ -96,13 +102,15 @@ def Plot_tnse_2D(word_vectors,words_list):
         plt.annotate(label,xy=(x+1,y+1),xytext=(0,0),textcoords='offset points')
     plt.show()
 
-# 对关键词进行可视化
-def KeyWordView(KeyWordPath,CutWordtxt,model,wordCount):
+
+'''
+对关键词进行可视化
+KeywordList：关键词列表
+model：word2vec加载后的model
+'''
+def KeyWordView(KeywordList,model):
     print("正在执行word2vec的关键词可视化...")
     # 提取关键词
-    KeywordList=ExtractKeywords(KeyWordPath,CutWordtxt,wordCount)
-    Keywordstr=open(KeyWordPath,'r',encoding='utf-8').read()
-    KeywordList=Keywordstr.split(" ")
     words_list=[]
     word_vectors=[]
     for word in KeywordList:
@@ -117,7 +125,6 @@ def KeyWordView(KeyWordPath,CutWordtxt,model,wordCount):
         except:
             print("No word:{}".format(word))
     word_vectors=np.array(word_vectors)
-    print(word_vectors)
     print("Total words:", len(words_list), '\tWord Embedding shapes:', word_vectors.shape)
     Plot_tnse_2D(word_vectors,words_list)
 
@@ -125,7 +132,12 @@ def KeyWordView(KeyWordPath,CutWordtxt,model,wordCount):
 
 
 
-
+if __name__ == '__main__':
+    KeywordList=['中国','毕业','藏医药']
+    Binaryfile='Resources/Binaryfiles/xzw_total_WC'
+    model=word2vec.Word2Vec.load(Binaryfile)
+    KeyWordView(KeywordList,model)
+    
 
 
 

@@ -89,7 +89,7 @@ with graph.as_default():
 
 print("\nallpredictions:",all_predictions[400:500])
 print("\ny_test:",y_test[400:500])
-print("\ny_test:",y_test)
+# print("\ny_test:",y_test)
 # Print accuracy if y_test is defined
 if y_test is not None:
     correct_predictions = float(sum(all_predictions == y_test))

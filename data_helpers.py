@@ -4,7 +4,7 @@ from txt_Word2Vec import Process_News
 import numpy as np
 import itertools
 
-# 标签说明 ：宗教 0  文化1  生态2 
+# 标签说明 ：宗教 2  文化1  生态0 
 # 统计新闻
 def Statistic_News():
     jsonfile='./Resources/jsonfiles/xzw_total.json'
@@ -42,6 +42,7 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None,labelfile=None):
         x_text=[]
         # 标签说明
         label={
+            # 1所在的索引位置
             "宗教":[0,0,1],
             # "时政要闻":[0,0,1],
             '文化':[0,1,0],

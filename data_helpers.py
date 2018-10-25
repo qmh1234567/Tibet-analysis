@@ -14,7 +14,10 @@ def Statistic_News():
         contents={
         "宗教":0,
         "生态":0,
-        "文化":0
+        "文化":0,
+        "时政要闻":0,
+        "西藏新闻":0,
+        "援藏":0,
         }
         for dict_item in dicts:
             if dict_item['type'] in contents.keys():
@@ -24,8 +27,12 @@ def Statistic_News():
                 continue
     print(contents)
 
-# 加载数据集
-def load_data_and_labels(cutwordfile=None,jsonfile=None):
+'''加载数据集 
+输入：cutwordfile 分词后的文件路径  jsonfile：待处理的json文件 labelfile: 处理后的标签文件路径
+输出：x_text：三种类型的新闻列表 y：每条新闻的标签
+备注： 第一次调用或输入改变时需要用到返回值，第二次调用则直接读取文件
+'''
+def load_data_and_labels(cutwordfile=None,jsonfile=None,labelfile=None):
     x_text=[]
     with open(jsonfile,"r",encoding='utf-8') as f:
         dicts=json.load(f)
@@ -36,8 +43,9 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None):
         # 标签说明
         label={
             "宗教":[0,0,1],
+            # "时政要闻":[0,0,1],
             '文化':[0,1,0],
-            '生态':[1,0,0]
+            '生态':[1,0,0],
         }
         print('正在对文章进行分词...')
         for dict_item in dicts:
@@ -46,6 +54,7 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None):
                 y.append(key)
                 # 调用分词函数处理每篇文章
                 content = Process_News(dict_item['content'])
+                content=content[0:599]
                 x_text.append(content)
             else:
                 continue            
@@ -54,6 +63,8 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None):
             f.write(line+'\n')
     # 转化为np.array类型
     y=np.array(y)
+    # 将y写入txt文件
+    np.savetxt(labelfile,y)
     return [x_text,y]
 
 
@@ -61,7 +72,7 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None):
 def pad_sentences(sentences,padding_word="<PAD/>"):
     # 遍历每条新闻 找到最大长度的新闻
     squence_length=max(len(x) for x in sentences)
-    print(squence_length)
+    print("\n最大句子长度为",squence_length)
     padded_sentences=[]
     for i in range(len(sentences)):
         sentence=sentences[i]
@@ -105,20 +116,21 @@ def load_data():
     return [x,y,vocabulary,vocabulary_inv]
 
 # 针对一个数据集生成一个批迭代器
-def batch_iter(data,batch_size,num_epochs):
+def batch_iter(data,batch_size,num_epochs,shuffle=True):
     data=np.array(data)
     data_size=len(data)
     num_batches_per_epoch=int(len(data)/batch_size)+1
     for epoch in range(num_epochs):
         # shuffle_indices 的len为 data_size 随机元素组成的列表
-        shuffle_indices=np.random.permutation(np.arange(data_size))
-        shuffled_data=data[shuffle_indices]
+        if shuffle:
+            shuffle_indices=np.random.permutation(np.arange(data_size))
+            shuffled_data=data[shuffle_indices]
+        else:
+            shuffled_data=data        
         for batch_num in range(num_batches_per_epoch):
             start_index=batch_num*batch_size
             end_index=min((batch_num+1)*batch_size,data_size)
             yield shuffled_data[start_index:end_index]
 
-# if __name__ == '__main__':
-#     Statistic_News()
-       
-    
+
+

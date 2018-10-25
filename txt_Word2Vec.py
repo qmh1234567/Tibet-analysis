@@ -119,9 +119,13 @@ def KeyWordView(KeywordList,model):
             print("关键词:{}".format(word))
             print(result)
             print("-"*100)
+            # 得到word的词向量
             w2v=model.wv[word]
-            words_list.append(word)
             word_vectors.append(w2v)
+            # 得到意思相近的词向量
+            for item in result:
+                word_vectors.append(model.wv[item[0]])
+                words_list.append(word)
         except:
             print("No word:{}".format(word))
     word_vectors=np.array(word_vectors)
@@ -132,11 +136,6 @@ def KeyWordView(KeywordList,model):
 
 
 
-if __name__ == '__main__':
-    KeywordList=['中国','毕业','藏医药']
-    Binaryfile='Resources/Binaryfiles/xzw_total_WC'
-    model=word2vec.Word2Vec.load(Binaryfile)
-    KeyWordView(KeywordList,model)
     
 
 

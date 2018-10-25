@@ -12,9 +12,10 @@ from tensorflow.contrib import learn
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("jsonfile", "./Resources/jsonfiles/xzw_total.json", "Data source for the json file.")
 tf.flags.DEFINE_string("cutwordfile", "./Resources/CutWordPath/xzw_part.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./Resources/labels/xzw_label.txt", "label save file")
 
 # Model Hyperparameters
-tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
+tf.flags.DEFINE_integer("embedding_dim", 200, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
 tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
@@ -41,21 +42,27 @@ FLAGS = tf.flags.FLAGS
 def preprocess():
     # Load data
     print("Loading data...")
-    x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile)
-   
+    # 第一次调用
+    x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile,FLAGS.labelfile)
+    # 第二次调用
+    # x_text=list(open(FLAGS.cutwordfile,"r",encoding='utf-8').read().splitlines())
+    # y=np.loadtxt(FLAGS.labelfile)
+
     # Build vocabulary
     max_document_length = max([len(x.split(" ")) for x in x_text])
+    print("max_document_length=",max_document_length)
     # 创建词汇表
     vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
     #文本转为词ID序列，未知或填充用的词ID为0,直接全文输出
     x = np.array(list(vocab_processor.fit_transform(x_text)))
-
+    
     # Randomly shuffle data
+    # 随机打乱数据
     np.random.seed(10)
-    # 返回一个随机序列
     shuffle_indices = np.random.permutation(np.arange(len(y)))
     x_shuffled = x[shuffle_indices]
     y_shuffled = y[shuffle_indices]
+   
 
     # Split train/test set
     # TODO: This is very crude, should use cross-validation
@@ -67,6 +74,7 @@ def preprocess():
 
     print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
     print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+
     return x_train, y_train, vocab_processor, x_dev, y_dev
 
 
@@ -81,18 +89,18 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
         with sess.as_default():
             cnn = TextCNN(
                 # shape[1]代表取列数
-                sequence_length=x_train.shape[1],
-                num_classes=y_train.shape[1],
-                vocab_size=len(vocab_processor.vocabulary_),
-                embedding_size=FLAGS.embedding_dim,
-                filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-                num_filters=FLAGS.num_filters,
+                sequence_length=x_train.shape[1], # 句子长度
+                num_classes=y_train.shape[1],  # 标签数
+                vocab_size=len(vocab_processor.vocabulary_), # 句子数量
+                embedding_size=FLAGS.embedding_dim,  # 词向量维度
+                filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))), # 卷积核大小
+                num_filters=FLAGS.num_filters,  # 卷积核数量
                 l2_reg_lambda=FLAGS.l2_reg_lambda)
 
             # Define Training procedure
-            # trainable=False 在梯度传播时不会修改global_step的值 
+            # global_step 记录全局训练步骤  trainable=False 在梯度传播时不会修改global_step的值 
             global_step = tf.Variable(0, name="global_step", trainable=False)
-            # 优化器
+            # 优化器  学习率=1e-3
             optimizer = tf.train.AdamOptimizer(1e-3)
             # 计算梯度
             grads_and_vars = optimizer.compute_gradients(cnn.loss)

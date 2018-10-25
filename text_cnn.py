@@ -13,7 +13,7 @@ class TextCNN(object):
 
         # Placeholders for input, output and dropout
         # None 代表任何大小
-        self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")
+        self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")  #将index向量转化为词向量
         self.input_y = tf.placeholder(tf.float32, [None, num_classes], name="input_y")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
@@ -24,7 +24,7 @@ class TextCNN(object):
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
             # W是词嵌入矩阵 存储vocab_size个大小为embedding_size的词向量  
             self.W = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
+                tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0), # 词向量采用均匀分布初始化
                 name="W")
             # self.embedded_chars是输入input_x对应的词向量表示 
             # size：[句子数量, sequence_length, embedding_size]

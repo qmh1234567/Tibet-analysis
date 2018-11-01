@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # 文件的路径
-jsonfile='./../../Resources/jsonfiles/politics.json'  
+jsonfile='./../../Resources/jsonfiles/culture.json'  
 # CutWordtxt='./../../Resources/CutWordPath/xzxw_st.txt'
-CutWordtxt='./../../Resources/CutWordPath/politics.txt'
-ImagePath='./../../Resources/1.jpg'
+CutWordtxt='./../../Resources/CutWordPath/culture.txt'
+ImagePath='./../../Resources/2.jpg'
 font_path='./../../Resources/fangsong_GB2312.ttf'
 word_dict_file='wordcloud.txt'
 
@@ -28,7 +28,7 @@ def GenWordCloud(str_words):
     # plt.imshow(wc)
     # plt.axis("off")
     # plt.show()
-    wc.to_file("politic.jpg")
+    wc.to_file("culture.jpg")
 
 def TF_IDF_NEWS(word_dict_file,CutWordtxt,n_features=1000):
     content_List=LoadWordList(CutWordtxt)
@@ -46,21 +46,21 @@ def TF_IDF_NEWS(word_dict_file,CutWordtxt,n_features=1000):
     word_list=sorted(dict_word.items(),key = lambda x:x[1],reverse = True)
 
     with open(word_dict_file,'w',encoding='utf-8') as f:
-        for i in range(30):
+        for i in range(100):
             f.write("{\"name\": \""+str(word_list[i][0])+"\",\"value\":"+str(word_list[i][1])+"},\n")
     print("写入文件成功")
 
 
 if __name__ == '__main__':
     # # 读取文件 第一次调用
-    content_list=Read_file(jsonfile,CutWordtxt,flag_stop=True)
-    str_content="".join(content_list)
+    # content_list=Read_file(jsonfile,CutWordtxt,flag_stop=True)
+    # str_content="".join(content_list)
     # TF_IDF_NEWS(word_dict_file,CutWordtxt,n_features=1000)
 
     '''词云图片'''
-    # # 第二次调用
-    # with open(CutWordtxt,'r',encoding='utf-8') as f:
-    #     str_content=f.read()
+    # 第二次调用
+    with open(CutWordtxt,'r',encoding='utf-8') as f:
+        str_content=f.read()
     GenWordCloud(str_content)
      
       

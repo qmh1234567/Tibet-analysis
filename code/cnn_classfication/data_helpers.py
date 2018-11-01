@@ -10,12 +10,14 @@ from txt_Word2Vec import Process_News
 # 标签说明 政治 2  文化1  社会0 
 # 统计新闻
 def Statistic_News():
-    jsonfile='../../Resources/jsonfiles/politics.json'
+    jsonfile='../../Resources/jsonfiles/data_test.json'
     with open(jsonfile,"r",encoding='utf-8') as f:
         count=0
         dicts=json.load(f)
         contents={
-        "政治"
+        "政治":0,
+        "文化":0,
+        "社会":0,
         }
         for dict_item in dicts:
             if dict_item['type'] in contents.keys():
@@ -130,6 +132,5 @@ def batch_iter(data,batch_size,num_epochs,shuffle=True):
             start_index=batch_num*batch_size
             end_index=min((batch_num+1)*batch_size,data_size)
             yield shuffled_data[start_index:end_index]
-
 
 

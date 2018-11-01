@@ -10,9 +10,9 @@ from tensorflow.contrib import learn
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/xzw_total.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/xzw_part.txt", "Data source for the cutword save file.")
-tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/xzw_label.txt", "label save file")
+tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/data_train.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/data_train.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/data_train_label.txt", "label save file")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 200, "Dimensionality of character embedding (default: 128)")

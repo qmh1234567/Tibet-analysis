@@ -10,9 +10,9 @@ import csv
 import sys
 
 # Data Parameters
-tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/xzxw_st.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/xzwtest.txt", "Data source for the cutword save file.")
-tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/xzw_label.txt", "label save file")
+tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/data_test.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/data_test.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/data_test_label.txt", "label save file")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")

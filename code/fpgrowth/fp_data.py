@@ -22,6 +22,7 @@ keywordCount:关键词数量
 def TF_IDF_keyword(CutWordtxt,keywordCount=5):
     content_List=LoadWordList(CutWordtxt)
     sentencelist=Sentences_list(content_List)
+    # print(sentencelist[1:3])
     ## 该类会将文本中的词语转换为词频矩阵，矩阵元素a[i][j] 表示j词在i类文本下的词频
     tf_vectorizer=TfidfVectorizer()
     keywordlists=[]
@@ -48,7 +49,7 @@ def TF_IDF_keyword(CutWordtxt,keywordCount=5):
     return keywordlists
 
 
-    
+
 
 '''将二级列表写入文件
 keywordlists:二级列表
@@ -68,15 +69,19 @@ def write_lists_to_file(keywordlists,keywordfile):
 
 
 # if __name__ == '__main__':
-    #    word2vec_keyword()
-    # Hanlp_keyword()
+#     #    word2vec_keyword()
+#     jsonfile='./../../Resources/jsonfiles/culture.json'   
+#     CutWordtxt='./../../Resources/CutWordPath/culture_stop.txt'
+#     # keywordfile='./../../Resources/Keywordfiles/society_keyword.txt'
+#     Hanlp_keyword(jsonfile,CutWordtxt)
     # 读取json文件，不去停用词，保留。
     # contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
     # keywordlists=TF_IDF_keyword(CutWordtxt)
     # write_lists_to_file(keywordlists,keywordfile)
 
+
 # #  hanlp 提取关键词
-# def Hanlp_keyword():
+# def Hanlp_keyword(jsonfile,CutWordtxt):
 #     # 读取分词后的文件
 #     contents=Read_file(jsonfile,CutWordtxt,flag_stop=True)
 #     # 统计最大长度的新闻
@@ -90,7 +95,6 @@ def write_lists_to_file(keywordlists,keywordfile):
 #     with open("keyword_hanlp.txt",'w',encoding='utf-8') as f:
 #         for item in Keywordlists:
 #             f.write(str(item)+"\n")
-
 
 # # 已经训练好的词向量模型
 # model = gensim.models.word2vec.Word2Vec.load(Binaryfile)

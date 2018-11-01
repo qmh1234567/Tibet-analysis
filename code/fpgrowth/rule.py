@@ -2,11 +2,14 @@ from fp_data import TF_IDF_keyword,write_lists_to_file
 import FPTree
 from FPGrowth1 import FPGrowth1
 # import FPGrowth1
+import sys
+sys.path.append(r'../common/')
+from txt_Word2Vec import Read_file
 
 # 文件的路径
-jsonfile='./../../Resources/jsonfiles/xzxw_st.json'  
-CutWordtxt='./../../Resources/CutWordPath/xzxw_st.txt'
-keywordfile='./../../Resources/Keywordfiles/xzw_keyword.txt'
+jsonfile='./../../Resources/jsonfiles/society.json'   
+CutWordtxt='./../../Resources/CutWordPath/society_stop.txt'
+keywordfile='./../../Resources/Keywordfiles/society_keyword.txt'
 
 # 加载数据
 def load_data(keywordfile):
@@ -34,8 +37,8 @@ def get_rules(keywordfile):
 
 if __name__ == '__main__':
     # 读取json文件，不去停用词，保留。 
-    '''修改文件后必须调用一次'''
-    # contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
+    # 修改文件后必须调用一次
+    contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
     
     keywordlists=TF_IDF_keyword(CutWordtxt,keywordCount=5)
     write_lists_to_file(keywordlists,keywordfile)

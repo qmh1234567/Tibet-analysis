@@ -9,11 +9,11 @@ sys.path.append(r'../common/')
 from txt_preprocess import LoadWordList,TF_IDF
 
 # 文件的路径
-CutWordtxt='./../../Resources/CutWordPath/xzw_total.txt' 
-Binaryfile='./../../Resources/Binaryfiles/xzw_total_WC'
+CutWordtxt='./../../Resources/CutWordPath/culture.txt' 
+Binaryfile='./../../Resources/Binaryfiles/culture'
 
-TibetUnTxt = './../../Resources/CutWordPath/tibetUn.txt'
-CorrectTxt = './../../Resources/CutWordPath/tibetUn_1.txt'
+# TibetUnTxt = './../../Resources/CutWordPath/tibetUn.txt'
+# CorrectTxt = './../../Resources/CutWordPath/tibetUn_1.txt'
 
 
 

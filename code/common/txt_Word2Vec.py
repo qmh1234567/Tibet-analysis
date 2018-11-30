@@ -46,6 +46,7 @@ def Read_file(jsonfile,CutWordtxt,flag_stop=True):
             # 调用分词函数处理每篇文章
             content = Process_News(item['content'],flag_stop)
             # 调用语料清洗函数
+            content=content[0:599]
             content=DataClean(content)
             contents.append(content)
     with open(CutWordtxt,'w',encoding='utf-8') as f:
@@ -95,7 +96,7 @@ def Tibet_Word2Vec(CutWordtxt,Binaryfile):
     # 构建词向量  size是特征向量的维度  workers是cup数量  min_count是词频少于min_count次数的单词会被丢弃掉  window：当前词与预测词在一个句子中的最大距离是多少
     # PathLineSentences 读取目录下的所有文件 sample表示更高频率的词被随机下采样到所设置的阈值  hs=1表示softmax会被使用
     # sg为训练算法  默认为0对应CBOW算法   1对于skip-gram算法
-    model=word2vec.Word2Vec(sentences,size=200,workers=4,min_count=10,window=5,negative=3,sample=0.0001,hs=1)
+    model=word2vec.Word2Vec(sentences,size=128,workers=4,min_count=10,window=4,negative=3,sample=0.0001,hs=1)
     # 保存至二进制文件
     model.save(Binaryfile)
     t2=time.time()
@@ -119,7 +120,9 @@ def Tibet_Word2Vec(CutWordtxt,Binaryfile):
 
 
 
-'''在二维图中显示词向量'''
+'''在二维图中显示词向量
+传入参数 词向量和单词列表
+'''
 def Plot_tnse_2D(word_vectors,words_list):
     tsne=TSNE(n_components=2,random_state=0,n_iter=10000,perplexity=3)
     np.set_printoptions(suppress=True)
@@ -133,28 +136,29 @@ def Plot_tnse_2D(word_vectors,words_list):
 
 
 '''
-对关键词进行可视化
+对一些词进行可视化
 KeywordList：关键词列表
 model：word2vec加载后的model
 '''
-def KeyWordView(KeywordList,model):
+def Wordlist_View(wordlist,model):
     print("正在执行word2vec的关键词可视化...")
     # 提取关键词
     words_list=[]
     word_vectors=[]
-    for word in KeywordList:
+    for word in wordlist:
         try:
             result=model.wv.most_similar(positive=[word],topn=15)
             print("关键词:{}".format(word))
             print(result)
             print("-"*100)
-            # 得到word的词向量
+            # 现将关键词的词向量添加进去
             w2v=model.wv[word]
             word_vectors.append(w2v)
+            words_list.append(word)
             # 得到意思相近的词向量
             for item in result:
-                word_vectors.append(model.wv[item[0]])
-                words_list.append(word)
+                word_vectors.append(model.wv[item[0]]) # 再添加相关词的词向量
+                words_list.append(item[0])
         except:
             print("No word:{}".format(word))
     word_vectors=np.array(word_vectors)

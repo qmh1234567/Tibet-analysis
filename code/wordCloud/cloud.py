@@ -10,7 +10,7 @@ import numpy as np
 jsonfile='./../../Resources/jsonfiles/culture.json'  
 # CutWordtxt='./../../Resources/CutWordPath/xzxw_st.txt'
 CutWordtxt='./../../Resources/CutWordPath/culture.txt'
-ImagePath='./../../Resources/2.jpg'
+ImagePath='./../../Resources/wordcloudpics/1.jpg'
 font_path='./../../Resources/fangsong_GB2312.ttf'
 word_dict_file='wordcloud.txt'
 

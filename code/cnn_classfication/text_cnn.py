@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+from wordvec import generate_word2vec
+
 
 class TextCNN(object):
     """
@@ -8,7 +10,7 @@ class TextCNN(object):
     Uses an embedding layer, followed by a convolutional, max-pooling and softmax layer.
     """
     def __init__(
-      self, sequence_length, num_classes, vocab_size,
+      self,w2v_model,sequence_length, num_classes, vocab_size,
       embedding_size, filter_sizes, num_filters, l2_reg_lambda=0.0):
 
         # Placeholders for input, output and dropout
@@ -22,10 +24,15 @@ class TextCNN(object):
 
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
-            # W是词嵌入矩阵 存储vocab_size个大小为embedding_size的词向量  
-            self.W = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0), # 词向量采用均匀分布初始化
-                name="W")
+            if w2v_model is None:
+                # W是词嵌入矩阵 存储vocab_size个大小为embedding_size的词向量  
+                self.W = tf.Variable(
+                    tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0), # 词向量采用均匀分布初始化
+                    name="W")
+            else:
+                self.W = tf.get_variable("word_embeddings",
+                    initializer=w2v_model.model.wv.vectors.astype(np.float32))
+                    
             # self.embedded_chars是输入input_x对应的词向量表示 
             # size：[句子数量, sequence_length, embedding_size]
             self.embedded_chars = tf.nn.embedding_lookup(self.W, self.input_x)
@@ -33,12 +40,13 @@ class TextCNN(object):
             # 维度变为[句子数量, sequence_length, embedding_size, 1]
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
 
+
         # Create a convolution + maxpool layer for each filter size
         pooled_outputs = []
         for i, filter_size in enumerate(filter_sizes):
             with tf.name_scope("conv-maxpool-%s" % filter_size):
                 # Convolution Layer
-                # filter_shape卷积核矩阵的大小  num_filters 输出通道数 
+                # filter_shape卷积核矩阵的大小  num_filters 卷积核数量  
                 # 卷积核大小 filter_size*embedding_size  输入通道数为1
                 filter_shape = [filter_size, embedding_size, 1, num_filters]
                 # 卷积核 形状为filter_shape  元素随机生成，正态分布
@@ -63,18 +71,18 @@ class TextCNN(object):
                     strides=[1, 1, 1, 1],
                     padding='VALID',
                     name="pool")
-                # 长度应该为num_filters
+                # 长度应该为num_filters   # 连接池化后的特征
                 pooled_outputs.append(pooled)
 
         # Combine all the pooled features
         num_filters_total = num_filters * len(filter_sizes)
         # 连接 pooled_outputs中的矩阵，从第3维连接（width)
         # 即对句子中的某个词，将不同核产生的结果拼接起来
-        self.h_pool = tf.concat(pooled_outputs, 3)
+        self.h_pool = tf.concat(pooled_outputs, 3) #[batch_size, 1, 1, num_filters_total]
         # 将pooled_outputs在第四维度上进行拼接
         self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
 
-        # Add dropout  使得某些节点的值不输出给softmax层
+        # 全连接层 Add dropout  使得某些节点的值不输出给softmax层
         with tf.name_scope("dropout"):
             self.h_drop = tf.nn.dropout(self.h_pool_flat, self.dropout_keep_prob)
 
@@ -83,19 +91,19 @@ class TextCNN(object):
         with tf.name_scope("output"):
             W = tf.get_variable(
                 "W",
-                shape=[num_filters_total, num_classes],
+                shape=[num_filters_total, num_classes],  # num_filters_total 倒数第二层的神经元个数
                 initializer=tf.contrib.layers.xavier_initializer())
             b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
             l2_loss += tf.nn.l2_loss(W)
             l2_loss += tf.nn.l2_loss(b)
-            # j矩阵乘法
+            # 矩阵乘法
             self.scores = tf.nn.xw_plus_b(self.h_drop, W, b, name="scores")
             self.predictions = tf.argmax(self.scores, 1, name="predictions")
 
         # Calculate mean cross-entropy loss
         with tf.name_scope("loss"):
             losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
-            self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
+            self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss  # 对损失函数进行l2正则化
 
         # Accuracy
         with tf.name_scope("accuracy"):

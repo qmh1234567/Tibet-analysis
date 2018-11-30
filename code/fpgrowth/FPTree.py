@@ -12,7 +12,7 @@ import sys
 #6. getConditionalPatternBase(itemName,baseSet)
 #7. isEmpty()
 class FPTree:
-    def __init__(self, transSet, minsup = 2):
+    def __init__(self, transSet, minsup = 50):
         self.transSet = transSet
         self.minsup = minsup
         self._preProcess()
@@ -198,7 +198,7 @@ def test():
     tree = FPTree(testcase)      
     tree.build()
     tree.printTree()
-    #print(tree.isUniquePath())
+    #print(tree.isUniquePath())c
     #c=[]
     #tree.getCombinationFromPath(c)
     #for s in c:
@@ -212,7 +212,7 @@ def test():
         #print(base[0])
         #print(base[1])
     
-if __name__ == "__main__":
-    test()    
+# if __name__ == "__main__":
+#     test()    
             
         

@@ -13,7 +13,7 @@ sys.path.append(r'../common/')
 from txt_Word2Vec import Read_file,Tibet_Word2Vec
 from txt_preprocess import LoadWordList,TF_IDF,Sentences_list
 
-
+Max_keyword_count=30
 
 '''idf提取关键词
 keywordCount:关键词数量
@@ -49,6 +49,23 @@ def TF_IDF_keyword(CutWordtxt,keywordCount=5):
     return keywordlists
 
 
+#  hanlp 提取关键词
+def Hanlp_keyword(content_List,CutWordtxt,Keywordtxt):
+    # 统计最大长度的新闻
+    max_len=max(len(x) for x in content_List)
+    # 提取每篇文章的关键字
+    Keywordlists=[]
+    for single_new in content_List:
+        # KeywordCount=round(len(single_new)/max_len * Max_keyword_count)+1
+        # print("KeywordCount=",KeywordCount)
+        keywordList=HanLP.extractKeyword(single_new,5)
+        Keywordlists.append(keywordList)
+    with open(Keywordtxt,'w',encoding='utf-8') as f:
+          for itemlist in Keywordlists:
+                for strword in itemlist:
+                    f.write(strword+" ")
+                f.write("\n")
+
 
 
 '''将二级列表写入文件
@@ -69,11 +86,11 @@ def write_lists_to_file(keywordlists,keywordfile):
 
 
 # if __name__ == '__main__':
-#     #    word2vec_keyword()
-#     jsonfile='./../../Resources/jsonfiles/culture.json'   
-#     CutWordtxt='./../../Resources/CutWordPath/culture_stop.txt'
-#     # keywordfile='./../../Resources/Keywordfiles/society_keyword.txt'
-#     Hanlp_keyword(jsonfile,CutWordtxt)
+    #    word2vec_keyword()
+    # jsonfile='./../../Resources/jsonfiles/society.json'   
+    # CutWordtxt='./../../Resources/CutWordPath/society1.txt'
+    # keywordfile='./../../Resources/Keywordfiles/society_keyword.txt'
+    # Hanlp_keyword(jsonfile,CutWordtxt)
     # 读取json文件，不去停用词，保留。
     # contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
     # keywordlists=TF_IDF_keyword(CutWordtxt)

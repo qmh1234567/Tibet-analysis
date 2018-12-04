@@ -26,7 +26,7 @@ def plt_Word2vec(Binaryfile):
     model=word2vec.Word2Vec.load(Binaryfile)
     # 输出与某个词相近的词
     wordlist=['政治','社会','文化']
-    Wordlist_View(wordlist,model)
+    Wordlist_View(wordlist,model,15)
 
 
 # 提取关键词

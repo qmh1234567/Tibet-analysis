@@ -140,14 +140,14 @@ def Plot_tnse_2D(word_vectors,words_list):
 KeywordList：关键词列表
 model：word2vec加载后的model
 '''
-def Wordlist_View(wordlist,model):
+def Wordlist_View(wordlist,model,topn):
     print("正在执行word2vec的关键词可视化...")
     # 提取关键词
     words_list=[]
     word_vectors=[]
     for word in wordlist:
         try:
-            result=model.wv.most_similar(positive=[word],topn=15)
+            result=model.wv.most_similar(positive=[word],topn=topn)
             print("关键词:{}".format(word))
             print(result)
             print("-"*100)

@@ -47,6 +47,8 @@ def CreateTrainset(content_List):
     corpus=[ dictionary.doc2bow(text) for text in cont_list]
     return dictionary,corpus
 
+    
+
 '''LDA模型训练 '''
 def TrainLDA(dictionary,corpus,n_topics):
     lda=LdaModel(corpus=corpus,id2word=dictionary,num_topics=n_topics)

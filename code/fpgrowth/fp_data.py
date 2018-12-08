@@ -7,12 +7,13 @@ import pandas as pd #引入它主要是为了更好的显示效果
 from gensim.models import word2vec
 import jieba
 import os
-from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
-
+from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer,TfidfTransformer
+import re
 sys.path.append(r'../common/')
 from txt_Word2Vec import Read_file,Tibet_Word2Vec
 from txt_preprocess import LoadWordList,TF_IDF,Sentences_list
-
+import shutil
+import codecs
 Max_keyword_count=30
 
 '''idf提取关键词
@@ -22,9 +23,8 @@ keywordCount:关键词数量
 def TF_IDF_keyword(CutWordtxt,keywordCount=5):
     content_List=LoadWordList(CutWordtxt)
     sentencelist=Sentences_list(content_List)
-    # print(sentencelist[1:3])
     ## 该类会将文本中的词语转换为词频矩阵，矩阵元素a[i][j] 表示j词在i类文本下的词频
-    tf_vectorizer=TfidfVectorizer()
+    tf_vectorizer=TfidfVectorizer()  
     keywordlists=[]
     for item in sentencelist:
         # 将文本转化为词频矩阵
@@ -36,13 +36,11 @@ def TF_IDF_keyword(CutWordtxt,keywordCount=5):
         weight=tf_matrix.toarray()
         word_index=np.argsort(-weight)  
         keyword=word[word_index]
-        # for i in range(len(weight)):
-        #     for j in range(len(word)):
-        #         print(word[j], round(weight[i][j]*1000))
         # 关键字最小长度
         min_length=min(len(x) for x in keyword)
         len_new="".join(item)
         tags=[]
+        # i 代表关键字长度 keyword是关键词列表，里面有很多关键词
         for i in range(keywordCount if keywordCount<min_length else min_length):
             tags.append(keyword[0][i])
         keywordlists.append(tags)
@@ -51,13 +49,12 @@ def TF_IDF_keyword(CutWordtxt,keywordCount=5):
 
 #  hanlp 提取关键词
 def Hanlp_keyword(content_List,CutWordtxt,Keywordtxt):
+    print("正在提取关键词..")
     # 统计最大长度的新闻
     max_len=max(len(x) for x in content_List)
     # 提取每篇文章的关键字
     Keywordlists=[]
     for single_new in content_List:
-        # KeywordCount=round(len(single_new)/max_len * Max_keyword_count)+1
-        # print("KeywordCount=",KeywordCount)
         keywordList=HanLP.extractKeyword(single_new,5)
         Keywordlists.append(keywordList)
     with open(Keywordtxt,'w',encoding='utf-8') as f:
@@ -84,34 +81,44 @@ def write_lists_to_file(keywordlists,keywordfile):
     return True
 
 
+# 将一份txt文件的每一行都写入一个txt文件
+def Write_to_many_txt(Cutwordtxt,filepath,titles):
+    with open(Cutwordtxt,'r',encoding='utf-8') as f:
+        news_list=f.read().splitlines()
+    # 遍历所有新闻
+    for i in range(len(titles)):
+        # 使用正则表达式去除标题的特殊符号和空格
+        titles[i]=re.sub(r'[\s | / \d ＂＂ " ? : “ ” \. \- +]','',titles[i])
+        filename=titles[i]+'.txt'
+        file=os.path.join(filepath,filename)  # 创建路径
+        # os.mknod(file)  # 生成文件
+        with open(file,'w',encoding='utf-8') as f:
+            f.write(news_list[i])
+    print("写入多个txt文件成功")
+    
+
+
 
 # if __name__ == '__main__':
-    #    word2vec_keyword()
-    # jsonfile='./../../Resources/jsonfiles/society.json'   
-    # CutWordtxt='./../../Resources/CutWordPath/society1.txt'
-    # keywordfile='./../../Resources/Keywordfiles/society_keyword.txt'
-    # Hanlp_keyword(jsonfile,CutWordtxt)
-    # 读取json文件，不去停用词，保留。
-    # contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
-    # keywordlists=TF_IDF_keyword(CutWordtxt)
-    # write_lists_to_file(keywordlists,keywordfile)
+#     #    word2vec_keyword()
+#     jsonfile='./../../Resources/jsonfiles/society.json'   
+#     CutWordtxt='./../../Resources/CutWordPath/society.txt'
+#     keywordfile='./society_keyword1.txt'
+#     keyfile='./society_hanlp.txt'
+   
+
+#     # 读取json文件，不去停用词，保留。
+#     titles,contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
+  
+#     # # 使用TF-IDF 提取关键词
+#     keywordlists=TF_IDF_keyword(CutWordtxt)
+#     write_lists_to_file(keywordlists,keywordfile)
+    
+    # # hanlp提取关键词
+    # Hanlp_keyword(contents,CutWordtxt,keyfile)
 
 
-# #  hanlp 提取关键词
-# def Hanlp_keyword(jsonfile,CutWordtxt):
-#     # 读取分词后的文件
-#     contents=Read_file(jsonfile,CutWordtxt,flag_stop=True)
-#     # 统计最大长度的新闻
-#     max_len=max(len(x) for x in contents)
-#     # 提取每篇文章的关键字
-#     Keywordlists=[]
-#     for single_new in contents:
-#         # KeywordCount=round(len(single_new)/max_len * Max_keyword_count)
-#         keywordList=HanLP.extractKeyword(single_new,5)
-#         Keywordlists.append(keywordList)
-#     with open("keyword_hanlp.txt",'w',encoding='utf-8') as f:
-#         for item in Keywordlists:
-#             f.write(str(item)+"\n")
+
 
 # # 已经训练好的词向量模型
 # model = gensim.models.word2vec.Word2Vec.load(Binaryfile)

@@ -38,6 +38,7 @@ contents:列表 每一项是分好词的新闻
 '''
 def Read_file(jsonfile,CutWordtxt,flag_stop=True):
     contents=[]
+    titles=[]
     # 读取json文件
     with open(jsonfile,'r',encoding='utf-8') as f:
         dicts=json.load(f)
@@ -46,13 +47,14 @@ def Read_file(jsonfile,CutWordtxt,flag_stop=True):
             # 调用分词函数处理每篇文章
             content = Process_News(item['content'],flag_stop)
             # 调用语料清洗函数
-            content=content[0:599]
             content=DataClean(content)
             contents.append(content)
+            # 提取标题
+            titles.append(item['title'])
     with open(CutWordtxt,'w',encoding='utf-8') as f:
         for line in contents:
             f.write(line+'\n')
-    return contents
+    return titles,contents
 
 
 

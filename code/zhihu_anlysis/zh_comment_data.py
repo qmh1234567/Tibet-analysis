@@ -14,6 +14,7 @@ def extract_article_list(dict_comment):
     article_place_list=[] # 位置
     article_business_list=[] # 行业
     article_major_list=[]  # 专业
+    article_comment_list=[] # 评论
 
     # 政治话题的评论者性别分布
     for article_info in dict_comment["社会"]:
@@ -35,8 +36,11 @@ def extract_article_list(dict_comment):
         for itemlist in article_major:
             article_mj.extend(itemlist)
         article_major_list.extend(article_mj)
+        # 评论
+        article_comment=article_info["dict_every_article_info"]["content"]
+        article_comment_list.extend(article_comment)
 
-    return article_gender_list,article_place_list,article_business_list,article_major_list
+    return article_gender_list,article_place_list,article_business_list,article_major_list,article_comment_list
 
 # 性别分布
 def plt_Pie(name,gender,htmlfile):
@@ -149,6 +153,7 @@ if __name__ == '__main__':
     major_htmlfile='./../../Resources/htmlfiles/major.html'
     comment_class_file='./../../Resources/htmlfiles/comment_class.html'
     jsonfile1='./../../Resources/jsonfiles/processed_zh_comment.json'
+    comment_txt='./../../Resources/CutWordPath/sentiment_comment.txt'
 
     dict_comment=Read_file(jsonfile1)
     attr=list(dict_comment.keys())
@@ -161,7 +166,7 @@ if __name__ == '__main__':
     bar.render(comment_class_file)
 
     # 提取需要的信息
-    article_gender_list,article_place_list,article_business_list,article_major_list=extract_article_list(dict_comment)
+    article_gender_list,article_place_list,article_business_list,article_major_list,articale_comment_list=extract_article_list(dict_comment)
 
     plt_Pie("社会话题的性别分布",article_gender_list,gender_htmlfile)
     print("评论用户性别分布执行结束,%s文件生成"% gender_htmlfile)
@@ -175,5 +180,13 @@ if __name__ == '__main__':
     major_list=clear_business(article_major_list)
     plt_business("评论用户专业分布",major_list,major_htmlfile)
     print("评论用户专业分布执行结束,%s文件生成"% major_htmlfile)
+
+    # 将评论写入测试文件
+    with open(comment_txt,'w',encoding='utf-8') as f:
+        for item in articale_comment_list:
+            f.write(item+"\n")
+        print("评论写入%s文件成功" % comment_txt)
+
+
 
     

@@ -105,7 +105,7 @@ def TF_IDF(n_features,content_List):
                                   max_features=n_features,
                                   stop_words='english',
                                   max_df=0.5,
-                                  min_df=10)
+                                  min_df=0.2)
     tf = tf_vectorizer.fit_transform(content_List)
     return tf,tf_vectorizer
 

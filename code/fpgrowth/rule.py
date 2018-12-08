@@ -8,10 +8,11 @@ from txt_Word2Vec import Read_file,LoadWordList
 
 
 # 文件的路径
-jsonfile='./../../Resources/jsonfiles/data_train.json'   
-CutWordtxt='./../../Resources/CutWordPath/data_train.txt'
-keywordtxt='./../../Resources/Keywordfiles/data_train_new.txt'
-# keywordfile='./../../Resources/Keywordfiles/keyword_hanlp.txt'
+jsonfile='./../../Resources/jsonfiles/culture.json'   
+CutWordtxt='./../../Resources/CutWordPath/culture.txt'
+# keywordtxt='./../../Resources/Keywordfiles/data_train_new.txt'
+keywordfile='./../../Resources/Keywordfiles/culture_keyword.txt'
+
 
 # 加载数据
 def load_data(keywordfile):
@@ -26,6 +27,7 @@ def load_data(keywordfile):
 
 # 生成关联规则
 def get_rules(keywordfile):
+    print("正在生成关联规则..")
     #testcase = [[["i2","i1","i5"],1],[["i2","i4"],1],[["i2","i3"],1],[["i2","i1","i4"],1],[["i1","i3"],1],[["i2","i3"],1],[["i1","i3"],1],[["i2","i1","i3","i5"],1],[["i2","i1","i3"],1]]
     testcase=load_data(keywordfile)
     tree = FPTree.FPTree(testcase,minsup=2)      
@@ -33,7 +35,7 @@ def get_rules(keywordfile):
     algorithm = FPGrowth1(minsup=2)
     algorithm.growth(tree,[])
     res = sorted(algorithm.fp, key=lambda d:d[1], reverse = True )
-    with open("rule_society.txt",'w',encoding='utf-8') as f:
+    with open("./rule.txt",'w',encoding='utf-8') as f:
         for rule in res:
             f.write(str(rule)+"\n")
     print("关联规则写入文件成功")
@@ -41,16 +43,16 @@ def get_rules(keywordfile):
 if __name__ == '__main__':
     # 读取json文件，不去停用词，保留。 
     # 修改文件后必须调用一次
-    # contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
-    
-    # keywordlists=TF_IDF_keyword(CutWordtxt,keywordCount=5)
-    
-    # write_lists_to_file(keywordlists,keywordfile)
-    # 读取分词后的文件
+    contents=Read_file(jsonfile,CutWordtxt,flag_stop=False)
+    keywordlists=TF_IDF_keyword(CutWordtxt,keywordCount=5)
+    write_lists_to_file(keywordlists,keywordfile)
+    get_rules(keywordfile)# 生成关联规则
 
-    content_List=LoadWordList(CutWordtxt)
-    Hanlp_keyword(content_List,CutWordtxt,keywordtxt)
-    get_rules(keywordtxt)
+
+    # # 读取分词后的文件
+    # content_List=LoadWordList(CutWordtxt)
+    # Hanlp_keyword(content_List,CutWordtxt,keywordtxt)
+    # get_rules(keywordtxt)
 
 
 

@@ -14,15 +14,17 @@ sys.path.append(r'../cnn_classfication/')
 from text_cnn import TextCNN
      
 # Data Parameters
-tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/sentiment_datatrain.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/sentiment_cut.txt", "Data source for the cutword save file.")
-tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/sentiment_label.txt", "label save file")
+tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/ChnSentiCrop.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/ChnSentiCrop_cut.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/ChnSentiCrop_label.txt", "label save file")
 tf.flags.DEFINE_string("w2v_file", "./../../Resources/Binaryfiles/sentiment.bin", "binary file")
+# traincutwordfile
+tf.flags.DEFINE_string("traincutwordfile", "./../../Resources/CutWordPath/sentiment_cut.txt", "Data source for the cutword save file.")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 # 需要修改路径
-tf.flags.DEFINE_string("checkpoint_dir", "./../cnn_classfication/runs/1543324924/checkpoints/", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "./../cnn_sentiment/runs/1544769089/checkpoints/", "Checkpoint directory from training run")
 # 需要修改为TRUE
 tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
@@ -39,8 +41,25 @@ for attr, value in sorted(FLAGS.flag_values_dict().items()):
     print("{}={}".format(attr.upper(), value))
 print("")
 
-# 生成词向量文件
-# model=Tibet_Word2Vec(FLAGS.cutwordfile,FLAGS.w2v_file)
+# 选择训练集和测试集的最大句子长度中较大的那一个
+def compute_maxdocument_length(filename,x_raw):
+    text=list(open(filename,"r",encoding='utf-8').read().splitlines())
+    actual_length=max(len(x.split(" ")) for x in text)  # 训练集的最大句子长度
+    max_document_length= max([len(x.split(" ")) for x in x_raw])  # 测试集的最大句子长度
+    x_raw1=[]
+    if actual_length > max_document_length:
+        max_document_length=actual_length
+        x_raw1.extend(x_raw)
+    else:      
+        for x in x_raw:
+            list1=x.split(" ")   
+            if len(list1) >= actual_length:
+                list1=list1[0:actual_length]  #截断
+                x_raw1.append(" ".join(list1))
+            else:
+                x_raw1.append(" ".join(list1))
+    return x_raw1,max_document_length
+
 
 def load_data(w2v_model):
     # CHANGE THIS: Load data. Load your own data here
@@ -54,9 +73,13 @@ def load_data(w2v_model):
     else:
         x_raw = ["a masterpiece four years in the making", "everything is off."]
         y_test = [1, 0]
-    max_document_length= max([len(x.split(" ")) for x in x_raw])
-    x=data_helpers.get_text_idx(x_raw,w2v_model.model.wv.vocab,max_document_length)
-    return x_raw,x,y_test
+
+    # 修改新闻内容和最大文档长度
+    x_raw1,max_document_length=compute_maxdocument_length(FLAGS.traincutwordfile,x_raw)
+
+    print('正在生成词典')
+    x=data_helpers.get_text_idx(x_raw1,w2v_model.model.wv.vocab,max_document_length)
+    return x_raw1,x,y_test
 
     # # Map data into vocabulary
     # vocab_path = os.path.join(FLAGS.checkpoint_dir, "..", "vocab")

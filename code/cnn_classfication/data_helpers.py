@@ -7,28 +7,29 @@ from gensim.models import word2vec,KeyedVectors
 sys.path.append(r'../common/')
 from txt_Word2Vec import Process_News
 from gensim.models import word2vec,KeyedVectors
+from matplotlib import pyplot as plt
 
+# 构建word2vec词向量
 class w2v_wrapper:
      def __init__(self,file_path):
         # w2v_file = os.path.join(base_path, "vectors_poem.bin")
         self.model =word2vec.Word2Vec.load(file_path)  # 加载词向量文件
         if 'unknown' not  in self.model.wv.vocab:
-            unknown_vec = np.random.uniform(-0.1,0.1,size=128)  # 产生300个[-0.1,0.1)的数 从均匀分布中随机采样
+            unknown_vec = np.random.uniform(-0.1,0.1,size=128)  # 产生128个[-0.1,0.1)的数 从均匀分布中随机采样
             self.model.wv.vocab['unknown'] = len(self.model.wv.vocab)
             self.model.wv.vectors = np.row_stack((self.model.wv.vectors,unknown_vec))
             
 
 '''标签说明 政治 2  文化1  社会0 '''
 # 统计新闻
-def Statistic_News():
-    jsonfile='../../Resources/jsonfiles/data_test.json'
+def Statistic_News(jsonfile):
     with open(jsonfile,"r",encoding='utf-8') as f:
         count=0
         dicts=json.load(f)
         contents={
-        "政治":0,
-        "文化":0,
-        "社会":0,
+        "Economy":0,
+        "Environment":0,
+        "Politics":0,
         }
         for dict_item in dicts:
             if dict_item['type'] in contents.keys():
@@ -69,7 +70,8 @@ def Draw_new_len(file_txt):
         index=[float(c)+0.4 for c in index]
         plt.ylim(ymax=6000, ymin=0)
         plt.xticks(index, name_list)
-        plt.ylabel("长度") #X轴标签
+        plt.xlabel("文章长度") #X轴标签
+        plt.ylabel("文章数目") #y轴标签
         for rect in rects:
             height = rect.get_height()
             plt.text(rect.get_x() + rect.get_width() / 2, height, str(height), ha='center', va='bottom')
@@ -106,32 +108,33 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None,labelfile=None):
         # 标签说明
         label={
             # 1所在的索引位置
-            "政治":[0,0,1],
+            "Economy":[0,0,1],
             # "时政要闻":[0,0,1],
-            '文化':[0,1,0],
-            '社会':[1,0,0],
+            'Environment':[0,1,0],
+            'Politics':[1,0,0],
         }
         print('正在对文章进行分词...')
         newcontent=[]
         for dict_item in dicts:
             if dict_item['type'] in label.keys() :
                 key=label[dict_item['type']]
-                y.append(key)
                 # 调用分词函数处理每篇文章
                 content = Process_News(dict_item['content'],flag_stop=True)
-                # 每篇文章提取400个词语
-                contentlist=content.split(" ")[0:500]
-                # 添加处理后的新闻
-                content=" ".join(contentlist)
-                # content=content[0:599]  #截断每篇文章
-                x_text.append(content)
+                if content.strip():  # 如果字符串非空
+                    contentlist=content.split(" ")
+                    # 每篇文章提取有限个词语
+                    # contentlist=content.split(" ")[0:299]
+                    # 添加处理后的新闻
+                    content=" ".join(contentlist)
+                    x_text.append(content)
+                    y.append(key)
             else:
                 continue            
     with open(cutwordfile,'w',encoding='utf-8') as f:
         # 截断新闻之后再写入，否则会增加写入的时间
-        # padded_sentences=pad_sentences(600,x_text,padding_word="<PAD/>")
         for sentence in x_text:
             f.write(sentence+'\n')
+        print("分词结束")
     # 转化为np.array类型
     y=np.array(y)
     # 将y写入txt文件
@@ -139,7 +142,7 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None,labelfile=None):
     return [x_text,y]
 
 
-# 根据word2vec建立词典
+'''根据word2vec建立词典 txt传入文本 vocab 词典 max_document_length最大文档长度'''
 def get_text_idx(text,vocab,max_document_length):
     text_array = np.zeros([len(text), max_document_length],dtype=np.int32)
     for i,x in  enumerate(text):
@@ -153,7 +156,7 @@ def get_text_idx(text,vocab,max_document_length):
 
 
 # 针对一个数据集生成一个批迭代器  生成批次数据
-# 使用生成器生成 num_epochsx num_batches_per_epoch 个批次的数据用于训练
+# 使用生成器生成 num_epochs x num_batches_per_epoch 个批次的数据用于训练
 def batch_iter(data,batch_size,num_epochs,shuffle=True):
     data=np.array(data)
     data_size=len(data)
@@ -173,3 +176,9 @@ def batch_iter(data,batch_size,num_epochs,shuffle=True):
             yield shuffled_data[start_index:end_index]
 
 
+if __name__ == '__main__':
+    jsonfile='../../Resources/jsonfiles/fudan_test.json'
+    Statistic_News(jsonfile)
+    # file_txt='./../../Resources/CutWordPath/fudan_train.txt'
+    # Draw_new_len(file_txt)
+    

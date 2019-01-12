@@ -49,14 +49,15 @@ def HanLp_Segment(raw,flag_stop=True):
     # 去除词性的标签
     str_words=""
     # 需要过滤掉的词性
-    word_feature=['/an','/g','/nb','/nz','/nba','/nbp','/nf','/nh','/nhd','/nhm','/ni', 
-    '/nit','/nm','/nn','/nr','/nt','/nrf','/nnt','/ns','/nis','/ntc','/ntcb','/nth','/n','/vn']
+    # word_feature=['/d','/v','/a','/an','/g','/nb','/nz','/nba','/nbp','/nf','/nh','/nhd','/nhm','/ni', 
+    # '/nit','/nm','/nn','/nr','/nt','/nrf','/nnt','/ns','/nis','/ntc','/ntcb','/nth','/n','/vn']
+    word_out=['/m','/q','/f','/u','/t','/udel','/ule','/qv']
     for v in wordList1[0:len(wordList1)]:
         if "/" in v:
             slope=v.index('/')
             # 先根据词性过滤掉一些词
-            # if v[slope:]=='/m' or v[slope:]=='/q' or v[slope:]=='/f' or v[slope:]=='/u' or v[slope:]=='/t':
-            if v[slope:] not in word_feature:
+            if v[slope:] in word_out:
+            # if v[slope:] not in word_feature:
                 continue
             # 添加换行符
             letter=v[1:slope]   # 截取/前面的字符串

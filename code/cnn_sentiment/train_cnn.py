@@ -14,9 +14,9 @@ from text_cnn import TextCNN
      
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/sentiment_datatrain.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/sentiment_cut.txt", "Data source for the cutword save file.")
-tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/sentiment_label.txt", "label save file")
+tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/hotelCorp.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/hotelCorp_cut.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/hotelCorp_label.txt", "label save file")
 tf.flags.DEFINE_string("w2v_file", "./../../Resources/Binaryfiles/sentiment.bin", "binary file")
 # tf.flags.DEFINE_string("cutKeywordfile", "./../../Resources/CutWordPath/data_keyword.txt", "cutKeywordfile")
 
@@ -55,24 +55,23 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 #FLAGS保存命令行参数的数据
 FLAGS = tf.flags.FLAGS
 
-# 第一次调用
-# x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile,FLAGS.labelfile)
+def first_train():
+    # 第一次调用
+    x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile,FLAGS.labelfile)
+    # 生成词向量文件
+    model=Tibet_Word2Vec(FLAGS.cutwordfile,FLAGS.w2v_file)
+    return x_text,y
 
-# 生成词向量文件
-# model=Tibet_Word2Vec(FLAGS.cutwordfile,FLAGS.w2v_file)
 
 def preprocess(w2v_model):
     # Load data
     print("Loading data...")
-    # Hanlp_keyword(FLAGS.cutwordfile,FLAGS.cutKeywordfile,KeyWord_Count=600)
-    # 第二次调用
     x_text=list(open(FLAGS.cutwordfile,"r",encoding='utf-8').read().splitlines())
     y=np.loadtxt(FLAGS.labelfile)
 
     # Build vocabulary
     max_document_length = max([len(x.split(" ")) for x in x_text])  # 每篇文章包含的最大词语数
     print("max_document_length=",max_document_length)  
-
     x=[]
     vocab_size=0
     if(w2v_model is None):
@@ -93,6 +92,7 @@ def preprocess(w2v_model):
     # Randomly shuffle data
     # 随机打乱数据
     np.random.seed(10)
+    print(len(y)/len(x))
     shuffle_indices = np.random.permutation(np.arange(len(y)))
     x_shuffled = x[shuffle_indices]
     y_shuffled = y[shuffle_indices]
@@ -241,6 +241,7 @@ def train(w2v_model,x_train, y_train, vocab_size, x_dev, y_dev):
                     print("Saved model checkpoint to {}\n".format(path))
 
 def main(argv=None):
+    first_train()
     w2v_wr = data_helpers.w2v_wrapper(FLAGS.w2v_file)
     x_train, y_train, x_dev, y_dev,vocab_size=preprocess(w2v_wr)
     train(w2v_wr,x_train, y_train, vocab_size, x_dev, y_dev)

@@ -7,6 +7,22 @@ from gensim.models import word2vec,KeyedVectors
 sys.path.append(r'../common/')
 from txt_Word2Vec import Process_News
 from gensim.models import word2vec,KeyedVectors
+import os
+import re
+
+def read_from_filelist(filepath,filelist,key):
+    list_all=[]
+    for f in filelist:
+        f=os.path.join(filepath,f)
+        with open(f,'r',encoding='utf-8') as f:
+            dicts={}
+            dicts['type']=key
+            dicts['content']=f.read().replace('\n','')
+            list_all.append(dicts)
+    return list_all
+
+
+
 
 class w2v_wrapper:
      def __init__(self,file_path):
@@ -41,14 +57,21 @@ def load_data_and_labels(cutwordfile=None,jsonfile=None,labelfile=None):
         print("loading data...")
         newcontent=[]
         for dict_item in dicts:
-            if dict_item['type'] in label.keys() :
-                key=label[dict_item['type']]
-                y.append(key)
-                # 直接取分词后的内容
-                content = dict_item['content']
-                x_text.append(content)
-            else:
-                continue            
+                if dict_item['type'] in label.keys() :
+                    key=label[dict_item['type']]
+                    # 调用分词函数处理每篇文章
+                    content = Process_News(dict_item['content'].replace('\n',''),flag_stop=False)
+                    if content.strip():  # 如果字符串非空
+                        content=re.sub(r'[、!,\.。，！：]','',content)
+                        x_text.append(content)
+                        y.append(key)
+                    # content=dict_item['content'].replace('\n','')
+                    # if content.strip():
+                    #     x_text.append(content)
+                    #     y.append(key)
+                else:
+                    continue       
+    # print(x_text[1:20])   
     with open(cutwordfile,'w',encoding='utf-8') as f:
         for sentence in x_text:
             f.write(sentence+'\n')
@@ -94,8 +117,9 @@ def batch_iter(data,batch_size,num_epochs,shuffle=True):
 
 
 # if __name__ == '__main__':
-#     txtfile='../../Resources/sentiment_datatrain.json'
-#     labelfile='../../Resources/sentiment_label.txt'
-#     cutwordfile='../../Resources/sentiment_cut.txt'
-#     load_data_and_labels(cutwordfile,txtfile,labelfile)
+# #     # txtfile='../../Resources/sentiment_datatrain.json'
+# #     # labelfile='../../Resources/sentiment_label.txt'
+# #     # cutwordfile='../../Resources/sentiment_cut.txt'
+# #     # load_data_and_labels(cutwordfile,txtfile,labelfile)
+
     

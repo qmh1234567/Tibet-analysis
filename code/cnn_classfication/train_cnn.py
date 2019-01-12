@@ -9,21 +9,23 @@ from tensorflow.contrib import learn
 # from wordvec import Hanlp_keyword
 import sys
 sys.path.append(r'../common/')
-from txt_Word2Vec import Tibet_Word2Vec
+from txt_Word2Vec import Tibet_Word2Vec,LoadWordList
+sys.path.append(r'../fpgrowth/')
+import fp_data
      
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/data_train.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/data_train.txt", "Data source for the cutword save file.")
-tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/data_train_label.txt", "label save file")
-tf.flags.DEFINE_string("w2v_file", "./../../Resources/Binaryfiles/datatrain_vector.bin", "binary file")
-# tf.flags.DEFINE_string("cutKeywordfile", "./../../Resources/CutWordPath/data_keyword.txt", "cutKeywordfile")
+tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/fudan_train.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/fudan_train.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/fudan_train_label.txt", "label save file")
+tf.flags.DEFINE_string("w2v_file", "./../../Resources/Binaryfiles/fudan_train_vector.bin", "binary file")
+tf.flags.DEFINE_string("Keywordfile", "./../../Resources/CutWordPath/fudan_train_keyword.txt", "cutKeywordfile")
 
 # Model Hyperparameters
 # 词向量长度
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
 # 卷积核大小
-tf.flags.DEFINE_string("filter_sizes", "5,6,7", "Comma-separated filter sizes (default: '3,4,5')")
+tf.flags.DEFINE_string("filter_sizes", "2,3,4", "Comma-separated filter sizes (default: '3,4,5')")
 # 每一种卷积核个数  
 tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
 # dropout 参数
@@ -54,18 +56,26 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 #FLAGS保存命令行参数的数据
 FLAGS = tf.flags.FLAGS
 
-# 第一次调用
-# x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile,FLAGS.labelfile)
 
-# 生成词向量文件
-# model=Tibet_Word2Vec(FLAGS.cutwordfile,FLAGS.w2v_file)
+def first_train():
+    # 第一次调用
+    # x_text,y=data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile,FLAGS.labelfile) # 分词，提取标签
+    # 分词后可以调用，节约分词时间
+    x_text=list(open(FLAGS.cutwordfile,"r",encoding='utf-8').read().splitlines())
+    y=np.loadtxt(FLAGS.labelfile)
+    # 调用tf-idf方法提取300个关键词
+    keywordlists=fp_data.TF_IDF_keyword(FLAGS.cutwordfile,300)
+    fp_data.write_lists_to_file(keywordlists,FLAGS.Keywordfile)
+    x_text=LoadWordList(FLAGS.Keywordfile)
+    # 生成词向量文件
+    model=Tibet_Word2Vec(FLAGS.cutwordfile,FLAGS.w2v_file)
+    
 
 def preprocess(w2v_model):
     # Load data
     print("Loading data...")
-    # Hanlp_keyword(FLAGS.cutwordfile,FLAGS.cutKeywordfile,KeyWord_Count=600)
-    # 第二次调用
-    x_text=list(open(FLAGS.cutwordfile,"r",encoding='utf-8').read().splitlines())
+    # 加载数据
+    x_text=list(open(FLAGS.Keywordfile,"r",encoding='utf-8').read().splitlines())
     y=np.loadtxt(FLAGS.labelfile)
 
     # Build vocabulary
@@ -87,6 +97,7 @@ def preprocess(w2v_model):
         # 建立词典
         x=data_helpers.get_text_idx(x_text,w2v_model.model.wv.vocab,max_document_length)
         vocab_size = len(w2v_model.model.wv.vocab)
+        print('vocab_size',vocab_size)
         print('use w2v .bin')
 
     # Randomly shuffle data
@@ -105,8 +116,8 @@ def preprocess(w2v_model):
     del x, y, x_shuffled, y_shuffled
 
     print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
-    print("x:",x_train[0:5])
-    print("y:",y_train[0:5])
+    # print("x:",x_train[0:5])
+    # print("y:",y_train[0:5])
     return x_train, y_train, x_dev, y_dev,vocab_size
 
 
@@ -240,6 +251,7 @@ def train(w2v_model,x_train, y_train, vocab_size, x_dev, y_dev):
                     print("Saved model checkpoint to {}\n".format(path))
 
 def main(argv=None):
+    first_train()
     w2v_wr = data_helpers.w2v_wrapper(FLAGS.w2v_file)
     x_train, y_train, x_dev, y_dev,vocab_size=preprocess(w2v_wr)
     train(w2v_wr,x_train, y_train, vocab_size, x_dev, y_dev)

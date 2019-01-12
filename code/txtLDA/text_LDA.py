@@ -9,8 +9,6 @@ from sklearn.decomposition import LatentDirichletAllocation
 import time
 
 
-
-
 '''
 查找主题
 '''
@@ -47,7 +45,7 @@ def CreateTrainset(content_List):
     corpus=[ dictionary.doc2bow(text) for text in cont_list]
     return dictionary,corpus
 
-    
+
 
 '''LDA模型训练 '''
 def TrainLDA(dictionary,corpus,n_topics):

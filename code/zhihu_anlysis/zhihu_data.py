@@ -33,7 +33,6 @@ def plt_wordcloud(new_words):
 
 
 
-
 # 文章以及作者信息
 class ZhihuData(object):
     def __init__(self,dict_content):
@@ -90,7 +89,7 @@ class ZhihuData(object):
         bar.show_config()
         bar.render(htmlfile) 
 
-
+    # 统计这些文章的标签，分为政治、文化、社会三类
     def static_tag(self,htmlfile,tag_json):
         ditc_tag={
             "政治":[],
@@ -134,16 +133,32 @@ class ZhihuData(object):
         bar.show_config()
         bar.render(htmlfile)
 
+    # GDP分布
     def plt_Tibet_map(self,htmlfile):
         value = [478.3, 218.00, 180.00, 133.31, 148.50,
             121, 46.5]
         attr = [u'拉萨市', u'日喀则市',  u'昌都市', u'林芝市', u'山南市', 
                 u'那曲地区', u"阿里地区"]
         map = Map(u"17年西藏各城市GDP分布", width=1200, height=600)
-        map.add("", attr, value, maptype=u'西藏',visual_range=[0,500],
+        map.add("GDP(亿元)", attr, value, maptype=u'西藏',visual_range=[0,500],
                 is_visualmap=True, visual_text_color='#000')
         map.show_config()
         map.render(htmlfile)
+
+    # 人口分布
+    def plt_Tibet_population(self,htmlfile):
+        value = [55, 70, 65, 19, 32,
+            19, 9]
+        attr = [u'拉萨市', u'日喀则市',  u'昌都市', u'林芝市', u'山南市', 
+                u'那曲地区', u"阿里地区"]
+        map = Map(u"17年西藏各城市人口分布", width=1200, height=600)
+        map.add("万人", attr, value, maptype=u'西藏',visual_range=[0,80],
+                is_visualmap=True, visual_text_color='#000')
+        map.show_config()
+        map.render(htmlfile)
+        
+
+        
 
 
 if __name__ == '__main__':
@@ -153,6 +168,7 @@ if __name__ == '__main__':
     catagory_htmlfile='./../../Resources/htmlfiles/category.html'
     tag_jsonfile="../../Resources/jsonfiles/tag.json"
     map_jsonfile='./../../Resources/htmlfiles/Tibetmap.html'
+    population_htmlfile='./../../Resources/htmlfiles/population.html'
 
     dict_content=Read_file(jsonfile)
     zh=ZhihuData(dict_content)
@@ -167,6 +183,9 @@ if __name__ == '__main__':
 
     zh.plt_Tibet_map(map_jsonfile)
     print("统计标签执行结束,%s文件生成"% map_jsonfile)
+
+    zh.plt_Tibet_population(population_htmlfile)
+    print("统计标签执行结束,%s文件生成"% population_htmlfile)
 
 
 

@@ -9,18 +9,20 @@ from tensorflow.contrib import learn
 import csv
 import sys
 sys.path.append(r'../common/')
-from txt_Word2Vec import Tibet_Word2Vec
-     
+from txt_Word2Vec import Tibet_Word2Vec,LoadWordList
+sys.path.append(r'../fpgrowth/')
+import fp_data     
 # Data Parameters
-tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/data_test.json", "Data source for the json file.")
-tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/data_test.txt", "Data source for the cutword save file.")
-tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/data_test_label.txt", "label save file")
-tf.flags.DEFINE_string("w2v_file", "./../../Resources/Binaryfiles/datatrain_vector.bin", "binary file")
+tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/fudan_test.json", "Data source for the json file.")
+tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/fudan_test.txt", "Data source for the cutword save file.")
+tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/fudan_test_label.txt", "label save file.")
+tf.flags.DEFINE_string("w2v_file", "./../../Resources/Binaryfiles/fudan_train_vector.bin", "binary file")
+tf.flags.DEFINE_string("Keywordfile", "./../../Resources/CutWordPath/fudan_test_keyword.txt", "cutKeywordfile")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 # 需要修改路径
-tf.flags.DEFINE_string("checkpoint_dir", "./../cnn_classfication/runs/1543391025/checkpoints/", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "./../cnn_classfication/runs/1545199870/checkpoints/", "Checkpoint directory from training run")
 # 需要修改为TRUE
 tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
@@ -43,12 +45,23 @@ print("")
 def load_data(w2v_model):
     # CHANGE THIS: Load data. Load your own data here
     if FLAGS.eval_train:
+        # 第一次调用
         # x_raw, y_test = data_helpers.load_data_and_labels(FLAGS.cutwordfile,FLAGS.jsonfile,FLAGS.labelfile)
+        print("分词结束")
         # 第二次调用
         x_raw=open(FLAGS.cutwordfile,"r",encoding='utf-8').read().splitlines()
         y_test=np.loadtxt(FLAGS.labelfile)
+        # print(len(x_raw),len(y_test))
+         # 调用tf-idf方法提取300个关键词
+        keywordlists=fp_data.TF_IDF_keyword(FLAGS.cutwordfile,300)
+        fp_data.write_lists_to_file(keywordlists,FLAGS.Keywordfile)
+        x_raw=LoadWordList(FLAGS.Keywordfile)
+        # print(len(x_raw),len(y_test))
         # 返回最大值所在的下标
         y_test = np.argmax(y_test, axis=1)
+        # print(list(y_test).count(0))
+        # print(list(y_test).count(1))
+        # print(list(y_test).count(2))
     else:
         x_raw = ["a masterpiece four years in the making", "everything is off."]
         y_test = [1, 0]
@@ -100,8 +113,8 @@ def eval(w2v_model):
                 batch_predictions = sess.run(predictions, {input_x: x_test_batch, dropout_keep_prob: 1.0})
                 all_predictions = np.concatenate([all_predictions, batch_predictions])
 
-    # print("\nallpredictions:",all_predictions[400:500])
-    # print("\ny_test:",y_test[400:500])
+    print("\nallpredictions:",all_predictions[400:500])
+    print("\ny_test:",y_test[400:500])
 
     if y_test is not None:
         correct_predictions = float(sum(all_predictions == y_test))

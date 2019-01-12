@@ -74,6 +74,7 @@ class TextCNN(object):
                 # 长度应该为num_filters   # 连接池化后的特征
                 pooled_outputs.append(pooled)
 
+        
         # Combine all the pooled features
         num_filters_total = num_filters * len(filter_sizes)
         # 连接 pooled_outputs中的矩阵，从第3维连接（width)

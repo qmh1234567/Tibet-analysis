@@ -8,11 +8,12 @@ from txt_preprocess import LoadWordList
 from pyhanlp import *
 import numpy as np
 
+
 # tf.flags.DEFINE_string("jsonfile", "./../../Resources/jsonfiles/data_train.json", "Data source for the json file.")
 # tf.flags.DEFINE_string("cutwordfile", "./../../Resources/CutWordPath/data_train.txt", "Data source for the cutword save file.")
 # tf.flags.DEFINE_string("labelfile", "./../../Resources/labels/data_train_label.txt", "label save file")
 # # tf.flags.DEFINE_string("cutkeywordfile", "./../../Resources/CutWordPath/data_train_keyword.txt", "label save file")
-# tf.flags.DEFINE_string("Binaryfile", "./../../Resources/Binaryfiles/datatrain_vector.bin", "binary file")
+tf.flags.DEFINE_string("Binaryfile", "./../../Resources/Binaryfiles/datatrain_vector.bin", "binary file")
 
 #FLAGS保存命令行参数的数据
 FLAGS = tf.flags.FLAGS
@@ -64,7 +65,8 @@ def generate_word2vec():
 
 
 if __name__ == '__main__':
-    generate_word2vec()
+    # generate_word2vec()
+    plt_Word2vec(FLAGS.Binaryfile)
 
    
 

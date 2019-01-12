@@ -1,0 +1,5 @@
+model_checkpoint_path: "C:\\Users\\qmh\\Documents\\myprojects\\python_pro\\Tibet_analysis\\code\\cnn_sentiment\\runs\\1544614688\\checkpoints\\model-400"
+all_model_checkpoint_paths: "C:\\Users\\qmh\\Documents\\myprojects\\python_pro\\Tibet_analysis\\code\\cnn_sentiment\\runs\\1544614688\\checkpoints\\model-100"
+all_model_checkpoint_paths: "C:\\Users\\qmh\\Documents\\myprojects\\python_pro\\Tibet_analysis\\code\\cnn_sentiment\\runs\\1544614688\\checkpoints\\model-200"
+all_model_checkpoint_paths: "C:\\Users\\qmh\\Documents\\myprojects\\python_pro\\Tibet_analysis\\code\\cnn_sentiment\\runs\\1544614688\\checkpoints\\model-300"
+all_model_checkpoint_paths: "C:\\Users\\qmh\\Documents\\myprojects\\python_pro\\Tibet_analysis\\code\\cnn_sentiment\\runs\\1544614688\\checkpoints\\model-400"

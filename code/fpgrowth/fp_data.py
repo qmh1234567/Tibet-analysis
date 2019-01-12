@@ -22,13 +22,17 @@ keywordCount:关键词数量
 '''
 def TF_IDF_keyword(CutWordtxt,keywordCount=5):
     content_List=LoadWordList(CutWordtxt)
-    sentencelist=Sentences_list(content_List)
+    sentencelist=Sentences_list(content_List) # 二级列表
     ## 该类会将文本中的词语转换为词频矩阵，矩阵元素a[i][j] 表示j词在i类文本下的词频
     tf_vectorizer=TfidfVectorizer()  
     keywordlists=[]
-    for item in sentencelist:
-        # 将文本转化为词频矩阵
-        tf_matrix=tf_vectorizer.fit_transform(item)
+    for itemlist in sentencelist:
+        # 防止列表为空列表，报错
+        try:
+            # 将文本转化为词频矩阵
+            tf_matrix=tf_vectorizer.fit_transform(itemlist)
+        except:
+            print(itemlist)
         # 获取词袋模型的所有词语
         word_dict=tf_vectorizer.get_feature_names()
         word=np.array(word_dict)
@@ -38,7 +42,7 @@ def TF_IDF_keyword(CutWordtxt,keywordCount=5):
         keyword=word[word_index]
         # 关键字最小长度
         min_length=min(len(x) for x in keyword)
-        len_new="".join(item)
+        len_new="".join(itemlist)
         tags=[]
         # i 代表关键字长度 keyword是关键词列表，里面有很多关键词
         for i in range(keywordCount if keywordCount<min_length else min_length):
@@ -77,7 +81,7 @@ def write_lists_to_file(keywordlists,keywordfile):
         for item in keywordlists:
             item_str=" ".join(item)
             f.write(item_str+"\n")
-    print("写入文件成功")
+    print("关键词写入文件成功")
     return True
 
 
